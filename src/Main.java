@@ -3,6 +3,7 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
+import render.Renderer;
 
 import java.nio.IntBuffer;
 
@@ -82,6 +83,7 @@ public class Main {
 
         // Make the window visible
         glfwShowWindow(window);
+
     }
 
     private void loop() {
@@ -95,12 +97,14 @@ public class Main {
         // Set the clear color
         glClearColor(.1f, .1f, .1f, 0.0f);
 
+
+        Renderer renderer = new Renderer();
         // Run the rendering loop until the user has attempted to close
         // the window or has pressed the ESCAPE key.
         while ( !glfwWindowShouldClose(window) ) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 
-
+            renderer.draw();
 
             glfwSwapBuffers(window); // swap the color buffers
 
