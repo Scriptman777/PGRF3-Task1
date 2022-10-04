@@ -4,6 +4,8 @@ import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 import render.Renderer;
+import solids.GridTriangles;
+import solids.ISolid;
 
 import java.nio.IntBuffer;
 
@@ -19,6 +21,7 @@ public class Main {
 
     public void run() {
         System.out.println("Hello LWJGL " + Version.getVersion() + "!");
+        ISolid gr = new GridTriangles(4,4);
 
         init();
         loop();

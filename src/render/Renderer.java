@@ -1,10 +1,9 @@
 package render;
 
-import lwjglutils.OGLBuffers;
 import lwjglutils.ShaderUtils;
-import model.Scene;
 import solids.DefaultTriangle;
 import solids.DefaultTriangleColor;
+import solids.GridTriangles;
 import solids.ISolid;
 
 import static org.lwjgl.opengl.GL33.*;
@@ -42,10 +41,13 @@ public class Renderer {
 
         glDrawElements(GL_TRIANGLES,tr.getIndexBuffer().length,GL_UNSIGNED_INT,0);
 
-        glVertexAttribPointer(1,2,GL_FLOAT,false,5*Float.BYTES,0);
-        glVertexAttribPointer(0,3,GL_FLOAT,false,5*Float.BYTES,2*Float.BYTES);
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
+
+        int inPosIndex = glGetAttribLocation(shaderProg,"inPos");
+        int inColorIndex = glGetAttribLocation(shaderProg,"inColor");
+        glVertexAttribPointer(inPosIndex,2,GL_FLOAT,false,5*Float.BYTES,0);
+        glVertexAttribPointer(inColorIndex,3,GL_FLOAT,false,5*Float.BYTES,2*Float.BYTES);
+        glEnableVertexAttribArray(inPosIndex);
+        glEnableVertexAttribArray(inColorIndex);
 
 
     }
