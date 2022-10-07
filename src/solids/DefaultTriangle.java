@@ -1,5 +1,7 @@
 package solids;
 
+import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
+
 public class DefaultTriangle implements ISolid{
 
     private float[] vBuff = {
@@ -21,4 +23,10 @@ public class DefaultTriangle implements ISolid{
     public int[] getIndexBuffer() {
         return iBuff;
     }
+
+    @Override
+    public int getPreferedRenderMode() {
+        return GL_TRIANGLES;
+    }
+
 }

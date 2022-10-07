@@ -11,5 +11,7 @@ public class Scene {
         solids.add(solid);
     }
 
-
+    public ArrayList<ISolid> getSolids() {
+        return solids;
+    }
 }

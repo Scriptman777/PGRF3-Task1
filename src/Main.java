@@ -21,7 +21,7 @@ public class Main {
 
     public void run() {
         System.out.println("Hello LWJGL " + Version.getVersion() + "!");
-        ISolid gr = new GridTriangles(4,4);
+        ISolid gr = new GridTriangles(2,2);
 
         init();
         loop();

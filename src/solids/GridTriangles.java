@@ -1,37 +1,59 @@
 package solids;
 
+import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
+
 public class GridTriangles implements ISolid {
 
-    public GridTriangles(int m, int n) {
-        vertexBuffer = new float[m*n*2];
-        indexBuffer = new int[6*(m-1)*(n-1)];
+    public GridTriangles(int totalRows, int totalCols) {
+        vertexBuffer = new float[totalRows*totalCols*2];
+        indexBuffer = new int[6*(totalRows-1)*(totalCols-1)];
 
         //Verts
         int index = 0;
-        for(int i = 0; i < m; i++){
-            for(int j = 0; j < n; j++){
-                System.out.println(j / (float) (n-1));
-                System.out.println(i / (float) (m-1));
-                vertexBuffer[index] = j / (float) (n-1);
-                vertexBuffer[index+1] = i / (float) (n-1);
-                index += 2;
+        for (int row = 0; row < totalRows; row++) {
+            for (int col = 0; col < totalCols; col++) {
+
+                float newX = col / (float) (totalCols-1);
+                vertexBuffer[index] = newX;
+
+                float newY = row / (float) (totalRows-1);
+                vertexBuffer[index+1] = newY;
+
+                index +=2;
             }
         }
 
-        //Indexes
+        //Indices
         index = 0;
-        for(int i = 0; i < m; i++){
-            for(int j = 0; j < n; j++){
-                System.out.println(j+i*m);
-                System.out.println(j+n+i*m);
-                System.out.println(j+1+i*m);
-                index += 2;
-                System.out.println(j+1+i*m);
-                System.out.println(j+n+i*m);
-                System.out.println(j+n+1+i*m);
+        for (int row = 0; row < totalRows-1; row++) {
+            for (int col = 0; col < totalCols-1; col++) {
+
+                int wholeRows = row*totalCols;
+
+                // Triangle 1
+
+                int newIn = col + wholeRows;
+                indexBuffer[index++] = newIn;
+
+                newIn = col + totalCols + wholeRows;
+                indexBuffer[index++] = newIn;
+
+                newIn = col + 1 + wholeRows;
+                indexBuffer[index++] = newIn;
+
+                // Triangle 2
+
+                newIn = col + 1 + wholeRows;
+                indexBuffer[index++] = newIn;
+
+                newIn = col + totalCols + wholeRows;
+                indexBuffer[index++] = newIn;
+
+                newIn = col + totalCols + wholeRows + 1;
+                indexBuffer[index++] = newIn;
+
             }
         }
-
 
 
     }
@@ -48,4 +70,10 @@ public class GridTriangles implements ISolid {
     public int[] getIndexBuffer() {
         return indexBuffer;
     }
+
+    @Override
+    public int getPreferedRenderMode() {
+        return GL_TRIANGLES;
+    }
+
 }
