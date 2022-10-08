@@ -19,7 +19,7 @@ public class Renderer {
         glUseProgram(shaderProg);
         uniformTime = glGetUniformLocation(shaderProg, "time");
 
-        scene.add(new GridTriangleStrip(5, 5));
+        scene.add(new GridTriangleStrip(8, 8));
 
     }
 

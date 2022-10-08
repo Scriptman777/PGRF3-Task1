@@ -21,7 +21,6 @@ public class Main {
 
     public void run() {
         System.out.println("Hello LWJGL " + Version.getVersion() + "!");
-        IRenderable gr = new GridTriangles(2,2);
 
         init();
         loop();

@@ -9,7 +9,8 @@ public class GridTriangleStrip implements IRenderable {
 
     public GridTriangleStrip(int totalRows, int totalCols) {
         vertexBuffer = new float[totalRows*totalCols*2];
-        indexBuffer = new int[6*totalRows*totalCols];
+        indexBuffer = new int[2*totalRows*totalCols];
+        java.util.Arrays.fill(indexBuffer,totalRows*totalCols-1);
 
         //Verts
         int index = 0;
@@ -65,39 +66,36 @@ public class GridTriangleStrip implements IRenderable {
             }
 
             // Magic row operation
-            if (forward) {
-                newIn = totalCols*2 + wholeRows - 1;
-                indexBuffer[index++] = newIn;
+            if (row < totalRows-2) {
+                if (forward) {
+                    newIn = totalCols*2 + wholeRows - 1;
+                    indexBuffer[index++] = newIn;
 
-                newIn = totalCols*2 + wholeRows - 1;
-                indexBuffer[index++] = newIn;
+                    newIn = totalCols*2 + wholeRows - 1;
+                    indexBuffer[index++] = newIn;
 
-                newIn = totalCols*3 + wholeRows - 1;
-                indexBuffer[index++] = newIn;
+                    newIn = totalCols*3 + wholeRows - 1;
+                    indexBuffer[index++] = newIn;
 
-                newIn = totalCols*2 + wholeRows - 1;
-                indexBuffer[index++] = newIn;
+                    newIn = totalCols*2 + wholeRows - 1;
+                    indexBuffer[index++] = newIn;
 
+                }
+
+                else {
+
+                    newIn = wholeRows+totalCols;
+                    indexBuffer[index++] = newIn;
+
+                    newIn = wholeRows+totalCols*2;
+                    indexBuffer[index++] = newIn;
+
+                }
             }
-            else {
-                newIn = wholeRows*2;
-                indexBuffer[index++] = newIn;
 
-                newIn = wholeRows*2;
-                indexBuffer[index++] = newIn;
-
-                newIn = wholeRows*3;
-                indexBuffer[index++] = newIn;
-
-            }
 
             forward = !forward;
         }
-
-
-
-
-
 
     }
 
