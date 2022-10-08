@@ -2,9 +2,12 @@ package solids;
 
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
 
-public class GridTriangles implements ISolid {
+public class GridTriangles implements IRenderable {
 
-    public GridTriangles(int totalRows, int totalCols) {
+    private float[] vertexBuffer;
+    private int[] indexBuffer;
+
+    public GridTriangles(int totalCols, int totalRows) {
         vertexBuffer = new float[totalRows*totalCols*2];
         indexBuffer = new int[6*(totalRows-1)*(totalCols-1)];
 
@@ -57,9 +60,6 @@ public class GridTriangles implements ISolid {
 
 
     }
-
-    private float[] vertexBuffer;
-    private int[] indexBuffer;
 
     @Override
     public float[] getVertexBuffer() {

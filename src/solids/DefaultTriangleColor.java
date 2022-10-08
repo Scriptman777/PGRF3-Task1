@@ -2,7 +2,7 @@ package solids;
 
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
 
-public class DefaultTriangleColor implements ISolid{
+public class DefaultTriangleColor implements IRenderable {
 
     private float[] vBuff = {
             -1,-1,1,0,0,

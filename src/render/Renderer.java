@@ -2,10 +2,7 @@ package render;
 
 import lwjglutils.ShaderUtils;
 import model.Scene;
-import solids.DefaultTriangle;
-import solids.DefaultTriangleColor;
-import solids.GridTriangles;
-import solids.ISolid;
+import solids.*;
 
 import static org.lwjgl.opengl.GL33.*;
 
@@ -22,19 +19,15 @@ public class Renderer {
         glUseProgram(shaderProg);
         uniformTime = glGetUniformLocation(shaderProg, "time");
 
-        scene.add(new GridTriangles(20,20));
+        scene.add(new GridTriangleStrip(5, 5));
 
     }
 
     public void draw(){
 
-
-
-
         glUniform1i(uniformTime,this.tick);
 
-
-        for (ISolid solid: scene.getSolids()) {
+        for (IRenderable solid: scene.getSolids()) {
 
             // Buffers
             int glVertexB = glGenBuffers();

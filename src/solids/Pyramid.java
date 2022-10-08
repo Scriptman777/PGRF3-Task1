@@ -2,7 +2,7 @@ package solids;
 
 import static org.lwjgl.opengl.GL11.GL_LINES;
 
-public class Pyramid implements ISolid{
+public class Pyramid implements IRenderable {
 
     private float[] vBuff = {
                             -0.8f,-0.8f,-0.8f,
