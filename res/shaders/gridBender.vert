@@ -3,7 +3,9 @@
 in vec2 inPos;
 //in vec3 inColor;
 
-//uniform int time;
+//uniform int u_Time;
+uniform mat4 u_Proj;
+uniform mat4 u_View;
 
 out vec3 vertColor;
 

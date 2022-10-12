@@ -2,14 +2,14 @@ package solids;
 
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
 
-public class GridTriangles implements IRenderable {
+public class GridTriangles extends AbstractRenderable {
 
-    private float[] vertexBuffer;
-    private int[] indexBuffer;
 
     public GridTriangles(int totalCols, int totalRows) {
+        super();
         vertexBuffer = new float[totalRows*totalCols*2];
         indexBuffer = new int[6*(totalRows-1)*(totalCols-1)];
+        preferredRenderMode = GL_TRIANGLES;
 
         //Verts
         int index = 0;
@@ -58,22 +58,10 @@ public class GridTriangles implements IRenderable {
             }
         }
 
+        initBuffers();
+
 
     }
 
-    @Override
-    public float[] getVertexBuffer() {
-        return vertexBuffer;
-    }
-
-    @Override
-    public int[] getIndexBuffer() {
-        return indexBuffer;
-    }
-
-    @Override
-    public int getPreferedRenderMode() {
-        return GL_TRIANGLES;
-    }
 
 }

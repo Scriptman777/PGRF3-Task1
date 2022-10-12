@@ -4,8 +4,6 @@ import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 import render.Renderer;
-import solids.GridTriangles;
-import solids.IRenderable;
 
 import java.nio.IntBuffer;
 

@@ -2,31 +2,16 @@ package solids;
 
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
 
-public class DefaultTriangleColor implements IRenderable {
-
-    private float[] vBuff = {
-            -1,-1,1,0,0,
-            1,0,0,1,0,
-            0,1,0,0,1
-    };
-    private int[] iBuff = {0,1,2};
-
+public class DefaultTriangleColor extends AbstractRenderable {
     public DefaultTriangleColor() {
-    }
-
-    @Override
-    public float[] getVertexBuffer() {
-        return vBuff;
-    }
-
-    @Override
-    public int[] getIndexBuffer() {
-        return iBuff;
-    }
-
-    @Override
-    public int getPreferedRenderMode() {
-        return GL_TRIANGLES;
+        super();
+        vertexBuffer = new float[]{
+                -1, -1, 1, 0, 0,
+                1, 0, 0, 1, 0,
+                0, 1, 0, 0, 1
+        };
+        indexBuffer = new int[]{0, 1, 2};
+        preferredRenderMode = GL_TRIANGLES;
     }
 
 }

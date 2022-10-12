@@ -2,12 +2,11 @@ package solids;
 
 import static org.lwjgl.opengl.GL11.GL_TRIANGLE_STRIP;
 
-public class GridTriangleStrip implements IRenderable {
+public class GridTriangleStrip extends AbstractRenderable {
 
-    private float[] vertexBuffer;
-    private int[] indexBuffer;
 
     public GridTriangleStrip(int totalRows, int totalCols) {
+        super();
         vertexBuffer = new float[totalRows*totalCols*2];
         indexBuffer = new int[2*totalRows*totalCols];
         java.util.Arrays.fill(indexBuffer,totalRows*totalCols-1);
@@ -96,21 +95,10 @@ public class GridTriangleStrip implements IRenderable {
 
             forward = !forward;
         }
+        initBuffers();
 
     }
 
-    @Override
-    public float[] getVertexBuffer() {
-        return vertexBuffer;
     }
 
-    @Override
-    public int[] getIndexBuffer() {
-        return indexBuffer;
-    }
-
-    @Override
-    public int getPreferedRenderMode() {
-        return GL_TRIANGLE_STRIP;
-    }
 }

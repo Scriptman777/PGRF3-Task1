@@ -1,17 +1,17 @@
 package model;
 
-import solids.IRenderable;
+import solids.AbstractRenderable;
 
 import java.util.ArrayList;
 
 public class Scene {
-    private ArrayList<IRenderable> solids = new ArrayList<>();
+    private ArrayList<AbstractRenderable> solids = new ArrayList<>();
 
-    public void add(IRenderable solid){
+    public void add(AbstractRenderable solid){
         solids.add(solid);
     }
 
-    public ArrayList<IRenderable> getSolids() {
+    public ArrayList<AbstractRenderable> getSolids() {
         return solids;
     }
 }
