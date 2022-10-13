@@ -20,15 +20,18 @@ public class Renderer {
     private int uniformView;
     private Scene scene = new Scene();
 
-    private Camera camera = new Camera()
-            .withPosition(new Vec3D(0.5f,-2f,1.5f))
-            .withAzimuth(Math.toRadians(90))
-            .withZenith(Math.toRadians(-45));
-
-    private Mat4 projection = new Mat4PerspRH(Math.PI,600/(float)800,0.1f, 50.f);
+    private Camera camera;
+    private Mat4 projection;
     private int shaderProg;
 
     public Renderer(){
+        camera = new Camera()
+                .withPosition(new Vec3D(0.5f, -2f, 1.5f))
+                .withAzimuth(Math.toRadians(90))
+                .withZenith(Math.toRadians(-45));
+
+        projection = new Mat4PerspRH(Math.PI / 3, 600 / (float)800, 0.1f, 50.f);
+
 
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
