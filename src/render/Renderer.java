@@ -32,7 +32,9 @@ public class Renderer {
 
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
-        scene.add(new GridTriangles(10, 10));
+        scene.add(new GridTriangleStrip(10, 10));
+
+
         shaderProg = ShaderUtils.loadProgram("/shaders/gridBender");
 
         //uniformTime = glGetUniformLocation(shaderProg, "u_Time");
