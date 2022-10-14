@@ -1,15 +1,15 @@
 #version 330
-
 in vec2 inPos;
-//in vec3 inColor;
 
-//uniform int u_Time;
-uniform mat4 u_Proj;
 uniform mat4 u_View;
-
-out vec3 vertColor;
+uniform mat4 u_Proj;
 
 void main() {
-    vertColor = vec3(1.f,0,0);
-    gl_Position = vec4(inPos.x-0.5,inPos.y-0.5,0.f,1.f);
+    // vstup <0;1>
+    // chci <-1;1>
+    vec2 pos = inPos * 2 - 1;
+    float z = 0.5 * cos(sqrt(20 * pow(pos.x, 2) + 20 * pow(pos.y, 2)));
+    vec4 posMVP = u_Proj * u_View * vec4(inPos, z, 1.f);
+    gl_Position = posMVP;
 }
+

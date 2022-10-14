@@ -1,9 +1,10 @@
 package render;
 
-import lwjglutils.OGLBuffers;
+import lwjglutils.OGLTexture2D;
 import lwjglutils.ShaderUtils;
 import model.Scene;
-import solids.*;
+import solids.AbstractRenderable;
+import solids.GridTriangles;
 import transforms.Camera;
 import transforms.Mat4;
 import transforms.Mat4PerspRH;
@@ -11,48 +12,44 @@ import transforms.Vec3D;
 
 import static org.lwjgl.opengl.GL33.*;
 
-
 public class Renderer {
-
-    private int tick = 100;
-    private int uniformTime;
-    private int uniformProj;
-    private int uniformView;
+    private int shaderProgram;
+    private Camera camera;
+    private Mat4 projection;
+    private OGLTexture2D texture;
     private Scene scene = new Scene();
 
-    private Camera camera = new Camera()
-            .withPosition(new Vec3D(0.5f,-2f,1.5f))
-            .withAzimuth(Math.toRadians(90))
-            .withZenith(Math.toRadians(-45));
+    public Renderer() {
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    private Mat4 projection = new Mat4PerspRH(Math.PI,600/(float)800,0.1f, 50.f);
-    private int shaderProg;
+        scene.add(new GridTriangles(20, 20));
 
-    public Renderer(){
+        camera = new Camera()
+                .withPosition(new Vec3D(0.5f, -2f, 1.5f))
+                .withAzimuth(Math.toRadians(90))
+                .withZenith(Math.toRadians(-45));
+        projection = new Mat4PerspRH(Math.PI / 3, 600 / (float)800, 0.1f, 50.f);
 
-        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+        shaderProgram = ShaderUtils.loadProgram("/shaders/gridBender");
+        glUseProgram(shaderProgram);
 
-        scene.add(new GridTriangles(10, 10));
-        shaderProg = ShaderUtils.loadProgram("/shaders/gridBender");
+        // Color
+        int loc_uColorR = glGetUniformLocation(shaderProgram, "u_ColorR");
+        glUniform1f(loc_uColorR, 1.f);
+        // View
+        int loc_uView = glGetUniformLocation(shaderProgram, "u_View");
+        glUniformMatrix4fv(loc_uView, false, camera.getViewMatrix().floatArray());
+        // Proj
+        int loc_uProj = glGetUniformLocation(shaderProgram, "u_Proj");
+        glUniformMatrix4fv(loc_uProj, false, projection.floatArray());
 
-        //uniformTime = glGetUniformLocation(shaderProg, "u_Time");
-        //glUniform1f(uniformTime,this.tick);
-
-        uniformProj = glGetUniformLocation(shaderProg, "u_Proj");
-        glUniformMatrix4fv(uniformProj, false, projection.floatArray());
-
-        uniformView = glGetUniformLocation(shaderProg, "u_View");
-        glUniformMatrix4fv(uniformView, false, camera.getViewMatrix().floatArray());
-
-        glUseProgram(shaderProg);
     }
 
-    public void draw(){
-
-        for (AbstractRenderable solid: scene.getSolids()) {
-            solid.draw(shaderProg);
+    public void draw() {
+        for (AbstractRenderable renderable:
+             scene.getSolids()) {
+            renderable.draw(shaderProgram);
         }
-
     }
-
 }
+

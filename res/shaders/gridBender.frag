@@ -1,11 +1,9 @@
 #version 330
 
-in vec3 vertColor;
-
-uniform int time;
+uniform float u_ColorR;
 
 out vec4 outColor;
 
 void main() {
-    outColor = vec4(vertColor, 1.f);
+    outColor = vec4(u_ColorR, 0.1f, 0.1f, 1.f);
 }

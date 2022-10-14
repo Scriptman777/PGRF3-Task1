@@ -99,6 +99,6 @@ public class GridTriangleStrip extends AbstractRenderable {
 
     }
 
-    }
-
 }
+
+
