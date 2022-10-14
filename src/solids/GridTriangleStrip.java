@@ -9,6 +9,7 @@ public class GridTriangleStrip extends AbstractRenderable {
         super();
         vertexBuffer = new float[totalRows*totalCols*2];
         indexBuffer = new int[2*totalRows*totalCols];
+        preferredRenderMode = GL_TRIANGLE_STRIP;
         java.util.Arrays.fill(indexBuffer,totalRows*totalCols-1);
 
         //Verts
