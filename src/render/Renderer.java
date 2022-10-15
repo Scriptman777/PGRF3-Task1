@@ -35,6 +35,7 @@ public class Renderer {
     private boolean mouseButton1 = false;
     float camSpeed = 0.05f;
     float ratio = 6;
+    float time = 0;
 
     //Uniforms
     int loc_uColorR;
@@ -42,6 +43,7 @@ public class Renderer {
     int loc_uProj;
     int loc_uShape;
     int loc_uRatio;
+    int loc_uTime;
 
     public Renderer(long window, int width, int height) {
         this.window = window;
@@ -51,7 +53,7 @@ public class Renderer {
 
         // Fill scene
         AbstractRenderable newObj = new GridTriangleStrip(40,40);
-        newObj.setIdentifier(ShapeIdents.CANDY);
+        newObj.setIdentifier(ShapeIdents.DONUT);
         scene.add(newObj);
 
         // MVP init
@@ -70,6 +72,7 @@ public class Renderer {
         loc_uProj = glGetUniformLocation(shaderProgram, "u_Proj");
         loc_uShape = glGetUniformLocation(shaderProgram, "u_shapeID");
         loc_uRatio = glGetUniformLocation(shaderProgram, "u_Ratio");
+        loc_uTime = glGetUniformLocation(shaderProgram, "u_Time");
 
         initControls();
     }
@@ -81,6 +84,7 @@ public class Renderer {
         glUseProgram(shaderProgram);
 
         glUniform1f(loc_uRatio, ratio);
+        glUniform1f(loc_uTime, time);
         glUniform1f(loc_uColorR, 1.f);
         glUniformMatrix4fv(loc_uView, false, camera.getViewMatrix().floatArray());
         glUniformMatrix4fv(loc_uProj, false, projection.floatArray());
@@ -91,6 +95,7 @@ public class Renderer {
             renderable.draw(shaderProgram);
 
         }
+        time+=0.01;
     }
 
     private void initControls() {

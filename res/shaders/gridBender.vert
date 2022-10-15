@@ -5,6 +5,7 @@ uniform mat4 u_View;
 uniform mat4 u_Proj;
 uniform int u_shapeID;
 uniform float u_Ratio;
+uniform float u_Time;
 
 void main() {
 
@@ -27,14 +28,21 @@ void main() {
     }
     // COS wave
     if (u_shapeID == 2) {
-        z = 0.5 * cos(sqrt(20 * pow(pos.x, 2) + 20 * pow(pos.y, 2))) - 0.5;
+        z = 0.5 * cos(sqrt(20 * pow(pos.x, 2) + 20 * pow(pos.y, 2)));
+    }
+    // COS wave anim
+    if (u_shapeID == 3) {
+        z = cos(u_Time) * cos(sqrt(20 * pow(pos.x, 2) + 20 * pow(pos.y, 2)));
     }
     // CANDY
-    if (u_shapeID == 3) {
+    if (u_shapeID == 4) {
         x = cos(pos.x)*cos(pos.y);
         y = pos.y;
         z = sin(pos.x);
     }
+
+
+
 
     vec4 posMVP = u_Proj * u_View * vec4(x,y,z, 1.f);
     gl_Position = posMVP;
