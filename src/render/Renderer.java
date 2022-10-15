@@ -11,6 +11,7 @@ import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import solids.AbstractRenderable;
 import solids.GridTriangleStrip;
 import solids.GridTriangles;
+import solids.ShapeIdents;
 import transforms.Camera;
 import transforms.Mat4;
 import transforms.Mat4PerspRH;
@@ -33,11 +34,14 @@ public class Renderer {
     double ox, oy;
     private boolean mouseButton1 = false;
     float camSpeed = 0.05f;
+    float ratio = 6;
 
     //Uniforms
     int loc_uColorR;
     int loc_uView;
     int loc_uProj;
+    int loc_uShape;
+    int loc_uRatio;
 
     public Renderer(long window, int width, int height) {
         this.window = window;
@@ -46,7 +50,9 @@ public class Renderer {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
         // Fill scene
-        scene.add(new GridTriangleStrip(50, 50));
+        AbstractRenderable newObj = new GridTriangleStrip(40,40);
+        newObj.setIdentifier(ShapeIdents.CANDY);
+        scene.add(newObj);
 
         // MVP init
         camera = new Camera()
@@ -62,6 +68,8 @@ public class Renderer {
         loc_uColorR = glGetUniformLocation(shaderProgram, "u_ColorR");
         loc_uView = glGetUniformLocation(shaderProgram, "u_View");
         loc_uProj = glGetUniformLocation(shaderProgram, "u_Proj");
+        loc_uShape = glGetUniformLocation(shaderProgram, "u_shapeID");
+        loc_uRatio = glGetUniformLocation(shaderProgram, "u_Ratio");
 
         initControls();
     }
@@ -72,15 +80,16 @@ public class Renderer {
 
         glUseProgram(shaderProgram);
 
+        glUniform1f(loc_uRatio, ratio);
         glUniform1f(loc_uColorR, 1.f);
         glUniformMatrix4fv(loc_uView, false, camera.getViewMatrix().floatArray());
         glUniformMatrix4fv(loc_uProj, false, projection.floatArray());
 
+        for (AbstractRenderable renderable: scene.getSolids()) {
 
-
-        for (AbstractRenderable renderable:
-             scene.getSolids()) {
+            glUniform1i(loc_uShape, renderable.getIdentifier());
             renderable.draw(shaderProgram);
+
         }
     }
 
@@ -164,6 +173,12 @@ public class Renderer {
                         break;
                     case GLFW_KEY_F:
                         camera = camera.mulRadius(1.1f);
+                        break;
+                    case GLFW_KEY_KP_ADD:
+                        ratio+=0.5;
+                        break;
+                    case GLFW_KEY_KP_SUBTRACT:
+                        ratio-=0.5;
                         break;
                 }
             }

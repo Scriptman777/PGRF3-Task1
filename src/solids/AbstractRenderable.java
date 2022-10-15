@@ -14,6 +14,8 @@ public abstract class AbstractRenderable{
 
     protected int preferredRenderMode;
 
+    protected int identifier;
+
     public AbstractRenderable() {
 
     }
@@ -33,6 +35,24 @@ public abstract class AbstractRenderable{
                 attribs,
                 indexBuffer
         );
+    }
+
+
+    /**
+     * Gets the indentifier for use in vertex shader
+     * Specifies shape of the object
+     * @return identifier as int
+     */
+    public int getIdentifier() {
+        return identifier;
+    }
+
+    /**
+     * Sets the indentifier for use in vertex shader
+     * Specifies shape of the object
+     */
+    public void setIdentifier(int identifier) {
+        this.identifier = identifier;
     }
 
     /**
