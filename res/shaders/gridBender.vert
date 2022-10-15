@@ -5,11 +5,21 @@ uniform mat4 u_View;
 uniform mat4 u_Proj;
 
 void main() {
-    // vstup <0;1>
-    // chci <-1;1>
-    vec2 pos = inPos * 2 - 1;
-    float z = 0.5 * cos(sqrt(20 * pow(pos.x, 2) + 20 * pow(pos.y, 2)));
-    vec4 posMVP = u_Proj * u_View * vec4(inPos, z, 1.f);
+
+    float ratio = 7;
+    vec2 pos = inPos * ratio - (ratio/2);
+    // Cos wave
+    //float z = 0.5 * cos(sqrt(20 * pow(pos.x, 2) + 20 * pow(pos.y, 2))) - 0.5;
+    float a = 2.f;
+    float b = 0.5f;
+
+    // Donut
+    float x = cos(pos.x)*(a + b*cos(pos.y));
+    float y = sin(pos.x)*(a + b*cos(pos.y));
+    float z = b*sin(pos.y);
+
+
+    vec4 posMVP = u_Proj * u_View * vec4(x,y,z, 1.f);
     gl_Position = posMVP;
 }
 
