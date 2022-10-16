@@ -2,22 +2,18 @@ package render;
 
 import lwjglutils.OGLTexture2D;
 import lwjglutils.ShaderUtils;
-import lwjglutils.ToFloatArray;
 import model.Scene;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import solids.AbstractRenderable;
 import solids.GridTriangleStrip;
-import solids.GridTriangles;
 import solids.ShapeIdents;
 import transforms.Camera;
 import transforms.Mat4;
 import transforms.Mat4PerspRH;
 import transforms.Vec3D;
 
-import java.awt.event.KeyEvent;
 import java.nio.DoubleBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -53,7 +49,7 @@ public class Renderer {
 
         // Fill scene
         AbstractRenderable newObj = new GridTriangleStrip(40,40);
-        newObj.setIdentifier(ShapeIdents.DONUT);
+        newObj.setIdentifier(ShapeIdents.TEST);
         scene.add(newObj);
 
         // MVP init
