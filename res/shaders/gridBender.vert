@@ -15,6 +15,9 @@ float x,y,z;
 vec2 pos;
 
 
+out vec2 vertPos;
+
+
 // Prepare for cartesian object
 void initCartesian() {
     pos = inPos * u_Ratio - (u_Ratio/2);
@@ -61,7 +64,7 @@ void main() {
         // Do nothing - flat grid
     }
     // DONUT
-    if (u_shapeID == 1) {
+    else if (u_shapeID == 1) {
         initCartesian();
         float a = 2.f;
         float b = 0.5f;
@@ -70,17 +73,17 @@ void main() {
         z = b*sin(pos.y);
     }
     // COS wave
-    if (u_shapeID == 2) {
+    else if (u_shapeID == 2) {
         initCartesian();
         z = 0.5 * cos(sqrt(20.f * pow(pos.x, 2.f) + 20 * pow(pos.y, 2.f)));
     }
     // COS wave anim
-    if (u_shapeID == 3) {
+    else if (u_shapeID == 3) {
         initCartesian();
         z = cos(u_Time) * cos(sqrt(20.f * pow(pos.x, 2.f) + 20 * pow(pos.y, 2.f)));
     }
     // CANDY
-    if (u_shapeID == 4) {
+    else if (u_shapeID == 4) {
         initCartesian();
         x = cos(pos.x)*cos(pos.y);
         y = pos.y;
@@ -92,37 +95,37 @@ void main() {
     // ======================
 
     // FRUIT
-    if (u_shapeID == 5) {
+    else if (u_shapeID == 5) {
         initPolar();
         r = 3.f*cos(4.f*phi);
         sphericalConvert();
     }
     // SHELL
-    if (u_shapeID == 6) {
+    else if (u_shapeID == 6) {
         initPolar();
         r = sqrt(phi);
         sphericalConvert();
     }
     // HOLE
-    if (u_shapeID == 7) {
+    else if (u_shapeID == 7) {
         initPolar();
         r = atanh(theta) + sin(u_Time);
         sphericalConvert();
     }
     // SPACESHIP
-    if (u_shapeID == 8) {
+    else if (u_shapeID == 8) {
         initPolar();
         r = log(theta) + cos(phi*4);
         sphericalConvert();
     }
     // BALL
-    if (u_shapeID == 9) {
+    else if (u_shapeID == 9) {
         initPolar();
         r = 1;
         sphericalConvert();
     }
     // PINECONE
-    if (u_shapeID == 10) {
+    else if (u_shapeID == 10) {
         initPolar();
         r = cos(theta*6);
         sphericalConvert();
@@ -133,13 +136,19 @@ void main() {
     // ======================
 
     // SOMBRERO
-    if (u_shapeID == 11) {
+    else if (u_shapeID == 11) {
         initCylindrical();
         h = sin(r*radians(360.f));
         cylindricalConvert();
     }
-    // AAAA
-    if (u_shapeID == 12) {
+    // FLOWER
+    else if (u_shapeID == 12) {
+        initCylindrical();
+        h = log(r)+sin(phi*6)*0.3;
+        cylindricalConvert();
+    }
+    // AAAAAAA
+    if (u_shapeID == 13) {
         initCylindrical();
         h = 1;
         cylindricalConvert();
@@ -148,6 +157,7 @@ void main() {
 
 
     vec4 posMVP = u_Proj * u_View * vec4(x,y,z,1.f);
+    vertPos = inPos;
     gl_Position = posMVP;
 }
 

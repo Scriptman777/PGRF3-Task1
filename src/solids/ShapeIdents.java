@@ -14,7 +14,8 @@ public class ShapeIdents {
     public static final int BALL = 9;
     public static final int PINECONE = 10;
     public static final int SOMBRERO = 11;
-    public static final int TEST = 12;
+    public static final int FLOWER = 12;
+    public static final int TEST = 13;
 
 
 }

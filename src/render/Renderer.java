@@ -32,9 +32,10 @@ public class Renderer {
     float camSpeed = 0.05f;
     float ratio = 6;
     float time = 0;
+    int colorMode = 0;
 
     //Uniforms
-    int loc_uColorR;
+    int loc_uColorMode;
     int loc_uView;
     int loc_uProj;
     int loc_uShape;
@@ -45,11 +46,11 @@ public class Renderer {
         this.window = window;
         this.width = width;
         this.height = height;
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
         // Fill scene
         AbstractRenderable newObj = new GridTriangleStrip(40,40);
-        newObj.setIdentifier(ShapeIdents.TEST);
+        newObj.setIdentifier(ShapeIdents.COS_WAVE_ANIM);
         scene.add(newObj);
 
         // MVP init
@@ -63,7 +64,7 @@ public class Renderer {
         // Shader init
         shaderProgram = ShaderUtils.loadProgram("/shaders/gridBender");
         // Uniform loc get
-        loc_uColorR = glGetUniformLocation(shaderProgram, "u_ColorR");
+        loc_uColorMode = glGetUniformLocation(shaderProgram, "u_ColorMode");
         loc_uView = glGetUniformLocation(shaderProgram, "u_View");
         loc_uProj = glGetUniformLocation(shaderProgram, "u_Proj");
         loc_uShape = glGetUniformLocation(shaderProgram, "u_shapeID");
@@ -81,7 +82,7 @@ public class Renderer {
 
         glUniform1f(loc_uRatio, ratio);
         glUniform1f(loc_uTime, time);
-        glUniform1f(loc_uColorR, 1.f);
+        glUniform1i(loc_uColorMode, colorMode);
         glUniformMatrix4fv(loc_uView, false, camera.getViewMatrix().floatArray());
         glUniformMatrix4fv(loc_uProj, false, projection.floatArray());
 
@@ -180,6 +181,12 @@ public class Renderer {
                         break;
                     case GLFW_KEY_KP_SUBTRACT:
                         ratio-=0.5;
+                        break;
+                    case GLFW_KEY_T:
+                        colorMode++;
+                        break;
+                    case GLFW_KEY_G:
+                        colorMode--;
                         break;
                 }
             }
