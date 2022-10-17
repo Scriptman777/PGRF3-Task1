@@ -15,7 +15,8 @@ float x,y,z;
 vec2 pos;
 
 
-out vec2 vertPos;
+out vec2 origVertPos;
+out vec3 computedVertPos;
 
 
 // Prepare for cartesian object
@@ -150,14 +151,14 @@ void main() {
     // AAAAAAA
     if (u_shapeID == 13) {
         initCylindrical();
-        h = 1;
+        h = pow(r,3)-1;
         cylindricalConvert();
     }
 
 
 
     vec4 posMVP = u_Proj * u_View * vec4(x,y,z,1.f);
-    vertPos = inPos;
+    origVertPos = inPos;
     gl_Position = posMVP;
 }
 

@@ -1,5 +1,6 @@
 package render;
 
+import constants.TexturePaths;
 import lwjglutils.OGLTexture2D;
 import lwjglutils.ShaderUtils;
 import model.Scene;
@@ -8,12 +9,13 @@ import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import solids.AbstractRenderable;
 import solids.GridTriangleStrip;
-import solids.ShapeIdents;
+import constants.ShapeIdents;
 import transforms.Camera;
 import transforms.Mat4;
 import transforms.Mat4PerspRH;
 import transforms.Vec3D;
 
+import java.io.IOException;
 import java.nio.DoubleBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -26,13 +28,14 @@ public class Renderer {
     private OGLTexture2D texture;
     private Scene scene = new Scene();
     private long window;
-    int width, height;
-    double ox, oy;
+    private int width, height;
+    private double ox, oy;
     private boolean mouseButton1 = false;
-    float camSpeed = 0.05f;
-    float ratio = 6;
-    float time = 0;
-    int colorMode = 0;
+    private boolean wireframe = false;
+    private float camSpeed = 0.05f;
+    private float ratio = 6;
+    private float time = 0;
+    private int colorMode = 0;
 
     //Uniforms
     int loc_uColorMode;
@@ -46,11 +49,12 @@ public class Renderer {
         this.window = window;
         this.width = width;
         this.height = height;
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+        glEnable(GL_DEPTH_TEST);
 
         // Fill scene
         AbstractRenderable newObj = new GridTriangleStrip(40,40);
-        newObj.setIdentifier(ShapeIdents.COS_WAVE_ANIM);
+        newObj.setIdentifier(ShapeIdents.BALL);
         scene.add(newObj);
 
         // MVP init
@@ -71,6 +75,14 @@ public class Renderer {
         loc_uRatio = glGetUniformLocation(shaderProgram, "u_Ratio");
         loc_uTime = glGetUniformLocation(shaderProgram, "u_Time");
 
+        // Texture init
+        try {
+            texture = new OGLTexture2D(TexturePaths.LAVA);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
         initControls();
     }
 
@@ -78,20 +90,34 @@ public class Renderer {
 
     public void draw() {
 
+        if (wireframe) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
+        else {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
+
+        // Bind texture
+        texture.bind();
+
+        // Shader
         glUseProgram(shaderProgram);
 
+        // Pass uniforms
         glUniform1f(loc_uRatio, ratio);
         glUniform1f(loc_uTime, time);
         glUniform1i(loc_uColorMode, colorMode);
         glUniformMatrix4fv(loc_uView, false, camera.getViewMatrix().floatArray());
         glUniformMatrix4fv(loc_uProj, false, projection.floatArray());
 
+        // Render scene
         for (AbstractRenderable renderable: scene.getSolids()) {
 
             glUniform1i(loc_uShape, renderable.getIdentifier());
             renderable.draw(shaderProgram);
 
         }
+        // Advance time
         time+=0.01;
     }
 
@@ -187,6 +213,9 @@ public class Renderer {
                         break;
                     case GLFW_KEY_G:
                         colorMode--;
+                        break;
+                    case GLFW_KEY_L:
+                        wireframe = !wireframe;
                         break;
                 }
             }

@@ -1,4 +1,4 @@
-package solids;
+package constants;
 
 public class ShapeIdents {
 
