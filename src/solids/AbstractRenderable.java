@@ -2,6 +2,8 @@ package solids;
 
 import lwjglutils.OGLBuffers;
 import lwjglutils.ShaderUtils;
+import transforms.Mat4;
+import transforms.Mat4Identity;
 
 import static org.lwjgl.opengl.GL20.glUseProgram;
 
@@ -16,8 +18,10 @@ public abstract class AbstractRenderable{
 
     protected int identifier;
 
-    public AbstractRenderable() {
+    protected Mat4 model = new Mat4Identity();
 
+    public AbstractRenderable() {
+        // Nothing needed
     }
 
     public void draw(int shaderLoc){
@@ -80,6 +84,14 @@ public abstract class AbstractRenderable{
      */
     public int getPreferedRenderMode() {
         return preferredRenderMode;
+    }
+
+    public Mat4 getModel() {
+        return model;
+    }
+
+    public void setModel(Mat4 model) {
+        this.model = model;
     }
 
 }

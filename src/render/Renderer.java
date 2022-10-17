@@ -10,10 +10,7 @@ import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import solids.AbstractRenderable;
 import solids.GridTriangleStrip;
 import constants.ShapeIdents;
-import transforms.Camera;
-import transforms.Mat4;
-import transforms.Mat4PerspRH;
-import transforms.Vec3D;
+import transforms.*;
 
 import java.io.IOException;
 import java.nio.DoubleBuffer;
@@ -41,6 +38,7 @@ public class Renderer {
     int loc_uColorMode;
     int loc_uView;
     int loc_uProj;
+    int loc_uModel;
     int loc_uShape;
     int loc_uRatio;
     int loc_uTime;
@@ -52,10 +50,7 @@ public class Renderer {
 
         glEnable(GL_DEPTH_TEST);
 
-        // Fill scene
-        AbstractRenderable newObj = new GridTriangleStrip(40,40);
-        newObj.setIdentifier(ShapeIdents.BALL);
-        scene.add(newObj);
+        createScene();
 
         // MVP init
         camera = new Camera()
@@ -71,13 +66,14 @@ public class Renderer {
         loc_uColorMode = glGetUniformLocation(shaderProgram, "u_ColorMode");
         loc_uView = glGetUniformLocation(shaderProgram, "u_View");
         loc_uProj = glGetUniformLocation(shaderProgram, "u_Proj");
+        loc_uModel = glGetUniformLocation(shaderProgram, "u_Model");
         loc_uShape = glGetUniformLocation(shaderProgram, "u_shapeID");
         loc_uRatio = glGetUniformLocation(shaderProgram, "u_Ratio");
         loc_uTime = glGetUniformLocation(shaderProgram, "u_Time");
 
         // Texture init
         try {
-            texture = new OGLTexture2D(TexturePaths.LAVA);
+            texture = new OGLTexture2D(TexturePaths.SKY);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -86,6 +82,20 @@ public class Renderer {
         initControls();
     }
 
+    private void createScene() {
+        // Fill scene
+        /*
+        AbstractRenderable skybox = new GridTriangleStrip(50,50);
+        skybox.setIdentifier(ShapeIdents.BALL);
+        Mat4 tempModel = skybox.getModel();
+        skybox.setModel(tempModel.mul(new Mat4Scale(10,10,10)));
+        scene.add(skybox);
+         */
+
+        AbstractRenderable obj = new GridTriangleStrip(50,50);
+        obj.setIdentifier(ShapeIdents.COS_WAVE_ANIM);
+        scene.add(obj);
+    }
 
 
     public void draw() {
@@ -110,10 +120,12 @@ public class Renderer {
         glUniformMatrix4fv(loc_uView, false, camera.getViewMatrix().floatArray());
         glUniformMatrix4fv(loc_uProj, false, projection.floatArray());
 
+
         // Render scene
         for (AbstractRenderable renderable: scene.getSolids()) {
 
             glUniform1i(loc_uShape, renderable.getIdentifier());
+            glUniformMatrix4fv(loc_uModel, false, renderable.getModel().floatArray());
             renderable.draw(shaderProgram);
 
         }

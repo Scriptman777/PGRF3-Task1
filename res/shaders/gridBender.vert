@@ -3,8 +3,10 @@
 in vec2 inPos;
 
 // Uniforms
+uniform mat4 u_Model;
 uniform mat4 u_View;
 uniform mat4 u_Proj;
+
 uniform int u_shapeID;
 uniform float u_Ratio;
 uniform float u_Time;
@@ -157,7 +159,7 @@ void main() {
 
 
 
-    vec4 posMVP = u_Proj * u_View * vec4(x,y,z,1.f);
+    vec4 posMVP = u_Proj * u_View * u_Model * vec4(x,y,z,1.f);
     origVertPos = inPos;
     gl_Position = posMVP;
 }
