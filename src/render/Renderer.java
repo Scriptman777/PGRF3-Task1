@@ -81,7 +81,7 @@ public class Renderer {
 
         // Texture init
         try {
-            texture = new OGLTexture2D(TexturePaths.SKY);
+            texture = new OGLTexture2D(TexturePaths.BRICK);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -101,7 +101,7 @@ public class Renderer {
         skybox.setColorMode(3);
         scene.add(skybox);
 
-         */
+
 
         AbstractRenderable hole = new GridTriangleStrip(50,50);
         hole.setIdentifier(ShapeIdents.HOLE_ANIM);
@@ -110,9 +110,10 @@ public class Renderer {
         hole.setColorMode(2);
         scene.add(hole);
 
+        */
 
-        mainObj = new GridTriangleStrip(1000,1000);
-        mainObj.setIdentifier(ShapeIdents.COS_WAVE_ANIM);
+        mainObj = new GridTriangleStrip(100,100);
+        mainObj.setIdentifier(ShapeIdents.DEFAULT);
         mainObj.setColorMode(0);
         scene.add(mainObj);
     }
@@ -164,7 +165,11 @@ public class Renderer {
         this.height = height;
     }
 
+    /**
+     * Initializes the window controls
+     */
     private void initControls() {
+
         // Mose move (from samples)
         glfwSetCursorPosCallback(window, new GLFWCursorPosCallback() {
             @Override

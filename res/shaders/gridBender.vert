@@ -20,6 +20,9 @@ vec2 pos;
 out vec2 origVertPos;
 out vec3 computedVertPos;
 
+out vec3 toLightVector;
+out vec3 normalVector;
+
 
 // Prepare for cartesian object
 void initCartesian() {
@@ -53,6 +56,12 @@ void cylindricalConvert() {
     x = r * cos(phi);
     y = r * sin(phi);
     z = h;
+}
+
+
+vec3 getNormal() {
+    // TODO
+    return vec3(0,0,-1);
 }
 
 void main() {
@@ -136,7 +145,7 @@ void main() {
     // SOMBRERO
     else if (u_shapeID == 11) {
         initCylindrical();
-        h = sin(r*radians(360.f));
+        h = sin(r*radians(360.f))/2;
         cylindricalConvert();
     }
     // FLOWER
@@ -151,18 +160,31 @@ void main() {
         h = pow(r,3)-1;
         cylindricalConvert();
     }
+    // DEFAULT
     else {
         initCartesian();
         // Do nothing - flat grid
     }
-    // DEFAULT
+
+    // Position in view coords
+    vec4 objectPosition = u_View * u_Model * vec4(x,y,z,1.f) ;
+
+    // LIGHT
+
+    vec4 lightSourcePos = u_View * u_Model * vec4(vec3(0, 0, 0.2), 1.f); // This will be uniform
+
+    toLightVector = lightSourcePos.xyz - objectPosition.xyz;
+
+    mat3 normalMatrix = transpose(inverse(mat3(u_View*u_Model)));
+
+    normalVector = normalMatrix * getNormal();
 
 
 
-
-    vec4 posMVP = u_Proj * u_View * u_Model * vec4(x,y,z,1.f);
+    // Proj and pass
+    vec4 postMVP = u_Proj * objectPosition;
     origVertPos = inPos;
-    gl_Position = posMVP;
+    gl_Position = postMVP;
 }
 
 
