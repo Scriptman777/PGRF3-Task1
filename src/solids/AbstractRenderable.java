@@ -16,7 +16,11 @@ public abstract class AbstractRenderable{
 
     protected int preferredRenderMode;
 
+    protected int colorMode;
+
     protected int identifier;
+
+
 
     protected Mat4 model = new Mat4Identity();
 
@@ -92,6 +96,14 @@ public abstract class AbstractRenderable{
 
     public void setModel(Mat4 model) {
         this.model = model;
+    }
+
+    public int getColorMode() {
+        return colorMode;
+    }
+
+    public void setColorMode(int colorMode) {
+        this.colorMode = colorMode;
     }
 
 }

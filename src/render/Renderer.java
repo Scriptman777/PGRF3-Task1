@@ -5,8 +5,7 @@ import lwjglutils.OGLTexture2D;
 import lwjglutils.ShaderUtils;
 import model.Scene;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.glfw.GLFWCursorPosCallback;
-import org.lwjgl.glfw.GLFWMouseButtonCallback;
+import org.lwjgl.glfw.*;
 import solids.AbstractRenderable;
 import solids.GridTriangleStrip;
 import constants.ShapeIdents;
@@ -21,18 +20,24 @@ import static org.lwjgl.opengl.GL33.*;
 public class Renderer {
     private int shaderProgram;
     private Camera camera;
-    private Mat4 projection;
+    private Mat4 projectionPersp;
+
+    private Mat4 projectionOrto;
     private OGLTexture2D texture;
     private Scene scene = new Scene();
     private long window;
+
     private int width, height;
     private double ox, oy;
     private boolean mouseButton1 = false;
     private boolean wireframe = false;
+    private boolean useFP = true;
+    private boolean usePersp = true;
     private float camSpeed = 0.05f;
     private float ratio = 6;
     private float time = 0;
-    private int colorMode = 0;
+
+    private AbstractRenderable mainObj;
 
     //Uniforms
     int loc_uColorMode;
@@ -57,7 +62,10 @@ public class Renderer {
                 .withPosition(new Vec3D(0.5f, -2f, 1.5f))
                 .withAzimuth(Math.toRadians(90))
                 .withZenith(Math.toRadians(-45));
-        projection = new Mat4PerspRH(Math.PI / 3, 600 / (float)800, 0.1f, 50.f);
+
+
+        projectionPersp = new Mat4PerspRH(Math.PI / 3, 600 / (float)800, 0.1f, 50.f);
+        projectionOrto = new Mat4OrthoRH(10,10,0.1f, 50.f);
 
 
         // Shader init
@@ -78,23 +86,35 @@ public class Renderer {
             throw new RuntimeException(e);
         }
 
-
         initControls();
     }
 
+
     private void createScene() {
         // Fill scene
+        Mat4 tempModel;
         /*
         AbstractRenderable skybox = new GridTriangleStrip(50,50);
         skybox.setIdentifier(ShapeIdents.BALL);
         Mat4 tempModel = skybox.getModel();
         skybox.setModel(tempModel.mul(new Mat4Scale(10,10,10)));
+        skybox.setColorMode(3);
         scene.add(skybox);
+
          */
 
-        AbstractRenderable obj = new GridTriangleStrip(50,50);
-        obj.setIdentifier(ShapeIdents.COS_WAVE_ANIM);
-        scene.add(obj);
+        AbstractRenderable hole = new GridTriangleStrip(50,50);
+        hole.setIdentifier(ShapeIdents.HOLE_ANIM);
+        tempModel = hole.getModel();
+        hole.setModel(tempModel.mul(new Mat4RotXYZ(45,45,0).mul(new Mat4Transl(4,4,2.5))));
+        hole.setColorMode(2);
+        scene.add(hole);
+
+
+        mainObj = new GridTriangleStrip(1000,1000);
+        mainObj.setIdentifier(ShapeIdents.COS_WAVE_ANIM);
+        mainObj.setColorMode(0);
+        scene.add(mainObj);
     }
 
 
@@ -116,15 +136,21 @@ public class Renderer {
         // Pass uniforms
         glUniform1f(loc_uRatio, ratio);
         glUniform1f(loc_uTime, time);
-        glUniform1i(loc_uColorMode, colorMode);
-        glUniformMatrix4fv(loc_uView, false, camera.getViewMatrix().floatArray());
-        glUniformMatrix4fv(loc_uProj, false, projection.floatArray());
 
+        // Change persp
+        if (usePersp) {
+            glUniformMatrix4fv(loc_uProj, false, projectionPersp.floatArray());
+        }
+        else {
+            glUniformMatrix4fv(loc_uProj, false, projectionOrto.floatArray());
+        }
+
+        glUniformMatrix4fv(loc_uView, false, camera.getViewMatrix().floatArray());
 
         // Render scene
         for (AbstractRenderable renderable: scene.getSolids()) {
-
             glUniform1i(loc_uShape, renderable.getIdentifier());
+            glUniform1i(loc_uColorMode, renderable.getColorMode());
             glUniformMatrix4fv(loc_uModel, false, renderable.getModel().floatArray());
             renderable.draw(shaderProgram);
 
@@ -133,9 +159,12 @@ public class Renderer {
         time+=0.01;
     }
 
+    public void updateSize(int width, int height) {
+        this.width = width;
+        this.height = height;
+    }
+
     private void initControls() {
-
-
         // Mose move (from samples)
         glfwSetCursorPosCallback(window, new GLFWCursorPosCallback() {
             @Override
@@ -149,9 +178,8 @@ public class Renderer {
             }
         });
 
-        // Mose click (from samples)
+        // Mouse click (from samples)
         glfwSetMouseButtonCallback(window, new GLFWMouseButtonCallback() {
-
             @Override
             public void invoke(long window, int button, int action, int mods) {
                 mouseButton1 = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS;
@@ -181,6 +209,16 @@ public class Renderer {
 
         });
 
+        glfwSetScrollCallback(window, new GLFWScrollCallback() {
+            @Override
+            public void invoke(long window, double dx, double dy) {
+                if (dy < 0)
+                    camera = camera.mulRadius(1.1f);
+                else
+                    camera = camera.mulRadius(0.9f);
+            }
+        });
+
         // Movement keys (based on samples)
         glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
             if ( key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE )
@@ -205,7 +243,7 @@ public class Renderer {
                     case GLFW_KEY_LEFT_SHIFT:
                         camera = camera.up(camSpeed);
                         break;
-                    case GLFW_KEY_SPACE:
+                    case GLFW_KEY_K:
                         camera = camera.withFirstPerson(!camera.getFirstPerson());
                         break;
                     case GLFW_KEY_R:
@@ -221,17 +259,21 @@ public class Renderer {
                         ratio-=0.5;
                         break;
                     case GLFW_KEY_T:
-                        colorMode++;
+                        mainObj.setColorMode(mainObj.getColorMode()+1);
                         break;
                     case GLFW_KEY_G:
-                        colorMode--;
+                        mainObj.setColorMode(mainObj.getColorMode()-1);
                         break;
                     case GLFW_KEY_L:
                         wireframe = !wireframe;
+                        break;
+                    case GLFW_KEY_P:
+                        usePersp = !usePersp;
                         break;
                 }
             }
         });
     }
+
 }
 

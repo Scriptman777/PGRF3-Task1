@@ -1,5 +1,6 @@
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
@@ -16,8 +17,11 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 public class Main {
     // The window handle
     private long window;
-    private int width = 800;
-    private int height = 600;
+
+    Renderer renderer;
+    int width = 1000;
+    int height = 900;
+
 
     public void run() {
         System.out.println("Hello LWJGL " + Version.getVersion() + "!");
@@ -59,6 +63,21 @@ public class Main {
                 glfwSetWindowShouldClose(window, true); // We will detect this in the rendering loop
         });
 
+        glfwSetFramebufferSizeCallback(window, new GLFWFramebufferSizeCallback() {
+            @Override
+            public void invoke(long window, int width, int height) {
+                System.out.println("RESIZE - W  " + width + "  H  " + height);
+                if (width > 0 && height > 0 &&
+                        (Main.this.width != width || Main.this.height != height)) {
+                    Main.this.width = width;
+                    Main.this.height = height;
+                    renderer.updateSize(width,height);
+                }
+
+            }
+        });
+
+
         // Get the thread stack and push a new frame
         try ( MemoryStack stack = stackPush() ) {
             IntBuffer pWidth = stack.mallocInt(1); // int*
@@ -88,6 +107,7 @@ public class Main {
 
     }
 
+
     private void loop() {
         // This line is critical for LWJGL's interoperation with GLFW's
         // OpenGL context, or any context that is managed externally.
@@ -100,11 +120,13 @@ public class Main {
         glClearColor(.1f, .1f, .1f, 0.0f);
 
 
-        Renderer renderer = new Renderer(window, width, height);
+        renderer = new Renderer(window, width, height);
         // Run the rendering loop until the user has attempted to close
         // the window or has pressed the ESCAPE key.
         while ( !glfwWindowShouldClose(window) ) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
+
+            glViewport(0, 0, width, height);
 
             renderer.draw();
 

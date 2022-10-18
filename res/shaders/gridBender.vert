@@ -61,13 +61,8 @@ void main() {
     // CARTESIAN OBJECTS
     // ======================
 
-    // DEFAULT
-    if (u_shapeID == 0) {
-        initCartesian();
-        // Do nothing - flat grid
-    }
     // DONUT
-    else if (u_shapeID == 1) {
+    if (u_shapeID == 1) {
         initCartesian();
         float a = 2.f;
         float b = 0.5f;
@@ -151,11 +146,17 @@ void main() {
         cylindricalConvert();
     }
     // AAAAAAA
-    if (u_shapeID == 13) {
+    else if (u_shapeID == 13) {
         initCylindrical();
         h = pow(r,3)-1;
         cylindricalConvert();
     }
+    else {
+        initCartesian();
+        // Do nothing - flat grid
+    }
+    // DEFAULT
+
 
 
 
