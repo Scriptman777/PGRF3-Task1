@@ -207,7 +207,6 @@ void main() {
 
     // LIGHT
 
-
     // Position in view coords
     vec4 objectPositionVM = u_View * u_Model * vec4(transformedPos, 1.f);
 

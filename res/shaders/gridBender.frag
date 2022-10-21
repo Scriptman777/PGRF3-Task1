@@ -64,7 +64,7 @@ void main() {
 
         // DIFFUSE
         vec3 ld = normalize(toLightVector);
-        vec3 nd = -normalize(normalVector);
+        vec3 nd = normalize(normalVector);
         vec3 vd = normalize(toViewVector);
 
         float NDotL = max(dot(nd,ld),0.f);
@@ -74,7 +74,7 @@ void main() {
         vec3 halfVector = normalize(ld + vd);
         float NDotH = max(0.0,dot(nd, halfVector));
 
-        vec4 specularPart = vec4(1,0,0,1) * specularStrength  * (pow(NDotH,shininess));
+        vec4 specularPart = vec4(1,1,1,1) * specularStrength  * (pow(NDotH,shininess));
 
         vec4 diffusePart = NDotL * lightColor;
 
