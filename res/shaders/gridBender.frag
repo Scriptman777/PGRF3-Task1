@@ -7,6 +7,7 @@ in vec3 normalVector;
 in vec3 toViewVector;
 
 uniform int u_ColorMode;
+uniform int u_LightMode;
 uniform bool u_useLight;
 
 uniform sampler2D inTexture;
@@ -58,9 +59,21 @@ void main() {
     // LIGHT
     if (u_useLight && u_ColorMode != 6) {
         vec4 lightColor = vec4(1,1,1,1);
-        float shininess = 8;
-        float ambient = 0.1;
-        float specularStrength = 0.1;
+        float shininess, ambientStrength, specularStrength;
+
+        // SHINY
+        if (u_LightMode == 1) {
+            shininess = 80.f;
+            ambientStrength = 0.1;
+            specularStrength = 5;
+        }
+        // DEFAULT
+        else {
+            shininess = 8.f;
+            ambientStrength = 0.1;
+            specularStrength = 0.1;
+        }
+
 
         // DIFFUSE
         vec3 ld = normalize(toLightVector);
@@ -78,13 +91,11 @@ void main() {
 
         vec4 diffusePart = NDotL * lightColor;
 
-        vec4 ambientPart = lightColor * ambient;
+        vec4 ambientPart = lightColor * ambientStrength;
 
 
         finalOutColor = (diffusePart + specularPart + ambientPart) * outColor;
-        //finalOutColor = (diffusePart + ambientPart) * outColor;
-        //finalOutColor = diffusePart * outColor;
-        //finalOutColor = specularPart * outColor;
+
     }
     else {
         // Do nothing with the color

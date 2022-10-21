@@ -16,6 +16,8 @@ public class ShapeIdents {
     public static final int SOMBRERO = 11;
     public static final int FLOWER = 12;
     public static final int TEST = 13;
+    public static final int LIGHT = 111;
+
 
 
 }

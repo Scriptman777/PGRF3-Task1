@@ -9,7 +9,6 @@ import org.lwjgl.glfw.*;
 import solids.AbstractRenderable;
 import solids.GridTriangleStrip;
 import constants.ShapeIdents;
-import solids.GridTriangles;
 import transforms.*;
 
 import java.io.IOException;
@@ -31,15 +30,16 @@ public class Renderer {
     private long window;
 
     private int width, height;
+    private int lightMode = 0;
     private double ox, oy;
     private boolean mouseButton1 = false;
     private boolean wireframe = false;
-    private boolean useFP = true;
     private boolean usePersp = true;
     private boolean useLight = true;
     private float camSpeed = 0.05f;
     private float ratio = 6;
     private float time = 0;
+    private float lightHeight = 0.7f;
 
     private AbstractRenderable mainObj;
 
@@ -53,6 +53,8 @@ public class Renderer {
     int loc_uTime;
     int loc_uLight;
     int loc_uCamPos;
+    int loc_uLightPos;
+    int loc_uLightMode;
 
     public Renderer(long window, int width, int height) {
         this.window = window;
@@ -86,6 +88,8 @@ public class Renderer {
         loc_uTime = glGetUniformLocation(shaderProgram, "u_Time");
         loc_uLight = glGetUniformLocation(shaderProgram,"u_useLight");
         loc_uCamPos = glGetUniformLocation(shaderProgram,"u_CamPos");
+        loc_uLightPos = glGetUniformLocation(shaderProgram,"u_LightPos");
+        loc_uLightMode = glGetUniformLocation(shaderProgram,"u_LightMode");
 
         // Texture init
         try {
@@ -118,10 +122,14 @@ public class Renderer {
         hole.setColorMode(2);
         scene.add(hole);
 
-        lightBall.setColorMode(6);
-        scene.add(lightBall);
+
 
         */
+
+
+        lightBall.setColorMode(6);
+        lightBall.setIdentifier(ShapeIdents.LIGHT);
+        scene.add(lightBall);
 
         mainObj = new GridTriangleStrip(100,100);
         mainObj.setIdentifier(ShapeIdents.DONUT);
@@ -148,11 +156,17 @@ public class Renderer {
         // Pass uniforms
         glUniform1f(loc_uRatio, ratio);
         glUniform1f(loc_uTime, time);
+        glUniform1i(loc_uLightMode, lightMode);
         glUniform3fv(loc_uCamPos, new float[] {(float) camera.getPosition().getX(),(float) camera.getPosition().getY(),(float) camera.getPosition().getZ()});
         glUniformMatrix4fv(loc_uView, false, camera.getViewMatrix().floatArray());
 
         // No support for passing bool uniforms, workaround needed - GLSL treats bool as a special int
         glUniform1i(loc_uLight,useLight ? 1 : 0);
+
+        // Move light
+        glUniform3fv(loc_uLightPos, new float[] {0, (float) (3.5*Math.sin(time/2)), lightHeight});
+        lightBall.setModel(new Mat4Transl(0,3.5*Math.sin(time/2),lightHeight));
+
 
         // Change persp
         if (usePersp) {
@@ -266,10 +280,10 @@ public class Renderer {
                         camera = camera.withFirstPerson(!camera.getFirstPerson());
                         break;
                     case GLFW_KEY_R:
-                        camera = camera.mulRadius(0.9f);
+                        lightMode++;
                         break;
                     case GLFW_KEY_F:
-                        camera = camera.mulRadius(1.1f);
+                        lightMode--;
                         break;
                     case GLFW_KEY_KP_ADD:
                         ratio+=0.5;
@@ -291,6 +305,12 @@ public class Renderer {
                         break;
                     case GLFW_KEY_L:
                         useLight = !useLight;
+                        break;
+                    case GLFW_KEY_KP_MULTIPLY:
+                        lightHeight += 0.1;
+                        break;
+                    case GLFW_KEY_KP_DIVIDE:
+                        lightHeight -= 0.1;
                         break;
 
                 }
