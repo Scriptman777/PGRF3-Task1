@@ -86,9 +86,12 @@ vec3 getPosition(vec2 pos){
         calcPos = initCartesian(pos);
         float a = 2.f;
         float b = 0.5f;
-        calcPos.x = cos(calcPos.x)*(a + b*cos(calcPos.y));
-        calcPos.y = sin(calcPos.x)*(a + b*cos(calcPos.y));
-        calcPos.z = b*sin(calcPos.y);
+        float x = calcPos.x;
+        float y = calcPos.y;
+        float z = calcPos.z;
+        calcPos.x = cos(x)*(a + b*cos(y));
+        calcPos.y = sin(x)*(a + b*cos(y));
+        calcPos.z = b*sin(y);
     }
     // COS wave
     else if (u_shapeID == 2) {
@@ -190,10 +193,12 @@ vec3 getPosition(vec2 pos){
 
 vec3 getNormal() {
 
-    float diffU, diffV = 0.01;
+    float diff = 0.01;
 
-    vec3 dU = getPosition(vec2(inPos.x + diffU,inPos.y)) - getPosition(vec2(inPos.x - diffU,inPos.y));
-    vec3 dV = getPosition(vec2(inPos.x,inPos.y + diffV)) - getPosition(vec2(inPos.x,inPos.y - diffV));
+    vec3 curPos = getPosition(inPos);
+
+    vec3 dU = getPosition(vec2(inPos.x + diff,inPos.y)) - curPos;
+    vec3 dV = getPosition(vec2(inPos.x,inPos.y + diff)) - curPos;
 
     return cross(dU, dV);
 
