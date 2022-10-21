@@ -9,6 +9,7 @@ import org.lwjgl.glfw.*;
 import solids.AbstractRenderable;
 import solids.GridTriangleStrip;
 import constants.ShapeIdents;
+import solids.GridTriangles;
 import transforms.*;
 
 import java.io.IOException;
@@ -33,6 +34,7 @@ public class Renderer {
     private boolean wireframe = false;
     private boolean useFP = true;
     private boolean usePersp = true;
+    private boolean useLight = true;
     private float camSpeed = 0.05f;
     private float ratio = 6;
     private float time = 0;
@@ -47,6 +49,8 @@ public class Renderer {
     int loc_uShape;
     int loc_uRatio;
     int loc_uTime;
+    int loc_uLight;
+    int loc_uCamPos;
 
     public Renderer(long window, int width, int height) {
         this.window = window;
@@ -78,10 +82,12 @@ public class Renderer {
         loc_uShape = glGetUniformLocation(shaderProgram, "u_shapeID");
         loc_uRatio = glGetUniformLocation(shaderProgram, "u_Ratio");
         loc_uTime = glGetUniformLocation(shaderProgram, "u_Time");
+        loc_uLight = glGetUniformLocation(shaderProgram,"u_useLight");
+        loc_uCamPos = glGetUniformLocation(shaderProgram,"u_CamPos");
 
         // Texture init
         try {
-            texture = new OGLTexture2D(TexturePaths.BRICK);
+            texture = new OGLTexture2D(TexturePaths.METAL);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -113,7 +119,7 @@ public class Renderer {
         */
 
         mainObj = new GridTriangleStrip(100,100);
-        mainObj.setIdentifier(ShapeIdents.DEFAULT);
+        mainObj.setIdentifier(ShapeIdents.CANDY);
         mainObj.setColorMode(0);
         scene.add(mainObj);
     }
@@ -137,6 +143,10 @@ public class Renderer {
         // Pass uniforms
         glUniform1f(loc_uRatio, ratio);
         glUniform1f(loc_uTime, time);
+        glUniform3fv(loc_uCamPos, new float[] {(float) camera.getPosition().getX(),(float) camera.getPosition().getY(),(float) camera.getPosition().getZ()});
+
+        // No support for passing bool uniforms, workaround needed - GLSL treats bool as a special int
+        glUniform1i(loc_uLight,useLight ? 1 : 0);
 
         // Change persp
         if (usePersp) {
@@ -147,6 +157,7 @@ public class Renderer {
         }
 
         glUniformMatrix4fv(loc_uView, false, camera.getViewMatrix().floatArray());
+
 
         // Render scene
         for (AbstractRenderable renderable: scene.getSolids()) {
@@ -269,11 +280,14 @@ public class Renderer {
                     case GLFW_KEY_G:
                         mainObj.setColorMode(mainObj.getColorMode()-1);
                         break;
-                    case GLFW_KEY_L:
+                    case GLFW_KEY_O:
                         wireframe = !wireframe;
                         break;
                     case GLFW_KEY_P:
                         usePersp = !usePersp;
+                        break;
+                    case GLFW_KEY_L:
+                        useLight = !useLight;
                         break;
                 }
             }

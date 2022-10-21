@@ -6,65 +6,86 @@ in vec2 inPos;
 uniform mat4 u_Model;
 uniform mat4 u_View;
 uniform mat4 u_Proj;
+uniform vec3 u_CamPos;
 
 uniform int u_shapeID;
 uniform float u_Ratio;
 uniform float u_Time;
-
-// Function vars
-float phi, theta, r, h;
-float x,y,z;
-vec2 pos;
-
 
 out vec2 origVertPos;
 out vec3 computedVertPos;
 
 out vec3 toLightVector;
 out vec3 normalVector;
+out vec3 toViewVector;
 
 
 // Prepare for cartesian object
-void initCartesian() {
-    pos = inPos * u_Ratio - (u_Ratio/2);
-    x = pos.x;
-    y = pos.y;
-    z = 1.f;
+vec3 initCartesian(vec2 coords) {
+    float x_cart, y_cart, z_cart;
+    vec3 tempPos = vec3(coords, 1.f);
+    vec3 pos = tempPos * u_Ratio - (u_Ratio/2);
+    x_cart = pos.x;
+    y_cart = pos.y;
+    z_cart = 1.f;
+    return vec3(x_cart, y_cart, z_cart);
 }
 
 // Prepare for polar object
-void initPolar() {
-    phi = inPos.x * radians(360.f);
-    theta = inPos.y * radians(180.f);
+vec3 initPolar(vec2 coords) {
+    float phi, theta;
+    phi = coords.x * radians(360.f);
+    theta = coords.y * radians(180.f);
+    return vec3(phi, theta, 1.f);
 }
 
 // Prepare for cylindrical object
-void initCylindrical() {
+vec3 initCylindrical(vec2 coords) {
+    float phi, r;
     phi = inPos.x * radians(360.f);
     r = inPos.y * u_Ratio/6;
+    return vec3(phi, r, 1.f);
 }
 
 // Convert spherical coords to cartesian
-void sphericalConvert() {
+vec3 sphericalConvert(vec3 calcPos) {
+    float x,y,z;
+    float phi = calcPos.x;
+    float theta = calcPos.y;
+    float r = calcPos.z;
+
     x = r * sin(theta) * cos(phi);
     y = r * sin(theta) * sin(phi);
     z = r * cos(theta);
+    return vec3(x,y,z);
 }
 
 // Convert cylindrical coords to cartesian
-void cylindricalConvert() {
+vec3 cylindricalConvert(vec3 calcPos) {
+    float x,y,z;
+    float phi = calcPos.x;
+    float r = calcPos.y;
+    float h = calcPos.z;
     x = r * cos(phi);
     y = r * sin(phi);
     z = h;
+    return vec3(x,y,z);
 }
 
 
 vec3 getNormal() {
+
+
     // TODO
     return vec3(0,0,-1);
+
+
 }
 
-void main() {
+vec3 getPosition(vec2 pos){
+
+    float x,y,z;
+    vec3 calcPos;
 
     // ======================
     // CARTESIAN OBJECTS
@@ -72,117 +93,134 @@ void main() {
 
     // DONUT
     if (u_shapeID == 1) {
-        initCartesian();
+        calcPos = initCartesian(pos);
         float a = 2.f;
         float b = 0.5f;
-        x = cos(pos.x)*(a + b*cos(pos.y));
-        y = sin(pos.x)*(a + b*cos(pos.y));
-        z = b*sin(pos.y);
+        calcPos.x = cos(calcPos.x)*(a + b*cos(calcPos.y));
+        calcPos.y = sin(calcPos.x)*(a + b*cos(calcPos.y));
+        calcPos.z = b*sin(calcPos.y);
     }
     // COS wave
     else if (u_shapeID == 2) {
-        initCartesian();
-        z = 0.5 * cos(sqrt(20.f * pow(pos.x, 2.f) + 20 * pow(pos.y, 2.f)));
+        calcPos = initCartesian(pos);
+        calcPos.z = 0.5 * cos(sqrt(20.f * pow(calcPos.x, 2.f) + 20 * pow(calcPos.y, 2.f)));
     }
     // COS wave anim
     else if (u_shapeID == 3) {
-        initCartesian();
-        z = cos(u_Time) * cos(sqrt(20.f * pow(pos.x, 2.f) + 20 * pow(pos.y, 2.f)));
+        calcPos = initCartesian(pos);
+        calcPos.z = cos(u_Time) * cos(sqrt(20.f * pow(calcPos.x, 2.f) + 20 * pow(calcPos.y, 2.f)));
     }
     // CANDY
     else if (u_shapeID == 4) {
-        initCartesian();
-        x = cos(pos.x)*cos(pos.y);
-        y = pos.y;
-        z = sin(pos.x);
+        calcPos = initCartesian(pos);
+        calcPos.y = calcPos.y;
+        calcPos.z = sin(calcPos.x);
+        calcPos.x = cos(calcPos.x)*cos(calcPos.y);
     }
 
     // ======================
     // POLAR OBJECTS
+    // x - phi
+    // y - theta
+    // z - r
     // ======================
+
 
     // FRUIT
     else if (u_shapeID == 5) {
-        initPolar();
-        r = 3.f*cos(4.f*phi);
-        sphericalConvert();
+        calcPos = initPolar(pos);
+        calcPos.z = 3.f*cos(4.f*calcPos.x);
+        calcPos = sphericalConvert(calcPos);
     }
     // SHELL
     else if (u_shapeID == 6) {
-        initPolar();
-        r = sqrt(phi);
-        sphericalConvert();
+        calcPos = initPolar(pos);
+        calcPos.z = sqrt(calcPos.x);
+        calcPos = sphericalConvert(calcPos);
     }
     // HOLE
     else if (u_shapeID == 7) {
-        initPolar();
-        r = atanh(theta) + sin(u_Time);
-        sphericalConvert();
+        calcPos = initPolar(pos);
+        calcPos.z = atanh(calcPos.y) + sin(u_Time);
+        calcPos = sphericalConvert(calcPos);
     }
     // SPACESHIP
     else if (u_shapeID == 8) {
-        initPolar();
-        r = log(theta) + cos(phi*4);
-        sphericalConvert();
+        calcPos = initPolar(pos);
+        calcPos.z = log(calcPos.y) + cos(calcPos.x*4);
+        calcPos = sphericalConvert(calcPos);
     }
     // BALL
     else if (u_shapeID == 9) {
-        initPolar();
-        r = 1;
-        sphericalConvert();
+        calcPos = initPolar(pos);
+        calcPos.z = 1.f;
+        calcPos = sphericalConvert(calcPos);
     }
     // PINECONE
     else if (u_shapeID == 10) {
-        initPolar();
-        r = cos(theta*6);
-        sphericalConvert();
+        calcPos = initPolar(pos);
+        calcPos.z = cos(calcPos.y*6);
+        calcPos = sphericalConvert(calcPos);
     }
 
     // ======================
     // CYLINDRICAL OBJECTS
+    // x - phi
+    // y - r
+    // z - h
     // ======================
 
     // SOMBRERO
     else if (u_shapeID == 11) {
-        initCylindrical();
-        h = sin(r*radians(360.f))/2;
-        cylindricalConvert();
+        calcPos = initCylindrical(pos);
+        calcPos.z = sin(calcPos.y*radians(360.f))/2;
+        calcPos = cylindricalConvert(calcPos);
     }
     // FLOWER
     else if (u_shapeID == 12) {
-        initCylindrical();
-        h = log(r)+sin(phi*6)*0.3;
-        cylindricalConvert();
+        calcPos = initCylindrical(pos);
+        calcPos.z = log(calcPos.y)+sin(calcPos.x*6)*0.3;
+        calcPos = cylindricalConvert(calcPos);
     }
     // AAAAAAA
     else if (u_shapeID == 13) {
-        initCylindrical();
-        h = pow(r,3)-1;
-        cylindricalConvert();
+        calcPos = initCylindrical(pos);
+        calcPos.z = pow(calcPos.y,3.f)-1;
+        calcPos = cylindricalConvert(calcPos);
     }
     // DEFAULT
     else {
-        initCartesian();
+        calcPos = initCartesian(pos);
         // Do nothing - flat grid
     }
 
-    // Position in view coords
-    vec4 objectPosition = u_View * u_Model * vec4(x,y,z,1.f) ;
+
+    return calcPos;
+}
+
+void main() {
+
+    vec3 transformedPos = getPosition(inPos);
 
     // LIGHT
 
+
+    // Position in view coords
+    vec4 objectPositionVM = u_View * u_Model * vec4(transformedPos, 1.f);
+
+
     vec4 lightSourcePos = u_View * u_Model * vec4(vec3(0, 0, 0.2), 1.f); // This will be uniform
 
-    toLightVector = lightSourcePos.xyz - objectPosition.xyz;
+    toLightVector = lightSourcePos.xyz - objectPositionVM.xyz;
 
     mat3 normalMatrix = transpose(inverse(mat3(u_View*u_Model)));
 
     normalVector = normalMatrix * getNormal();
 
-
+    toViewVector = - objectPositionVM.xyz;
 
     // Proj and pass
-    vec4 postMVP = u_Proj * objectPosition;
+    vec4 postMVP = u_Proj * objectPositionVM;
     origVertPos = inPos;
     gl_Position = postMVP;
 }

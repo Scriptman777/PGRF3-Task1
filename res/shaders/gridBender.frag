@@ -4,8 +4,10 @@ in vec2 origVertPos;
 in vec3 computedVertPos;
 in vec3 toLightVector;
 in vec3 normalVector;
+in vec3 toViewVector;
 
 uniform int u_ColorMode;
+uniform bool u_useLight;
 
 uniform sampler2D inTexture;
 
@@ -17,6 +19,7 @@ void main() {
     vec3 plasmaColor2 = vec3(0.226,0.000,0.615);
 
     vec4 outColor;
+
 
     // ITALIA
     if (u_ColorMode == 0) {
@@ -37,28 +40,52 @@ void main() {
     }
     // BLACK
     else if (u_ColorMode == 4) {
-        outColor = vec4(0,0,0,1);
+        outColor = vec4(0.1,0.1,0.1,1);
+    }
+    // NORMAL
+    else if (u_ColorMode == 5) {
+        outColor = vec4(normalVector.xyz,1);
     }
     // DEFAULT RED
     else {
         outColor = vec4(1.f,0,0,1.f);
     }
 
-
     // LIGHT
-    vec4 lightColor = vec4(0,1,0,1);
+    if (u_useLight) {
+        vec4 lightColor = vec4(1,1,1,1);
+        float shininess = 8;
+        float ambient = 0.01;
+        float specularStrength = 3;
 
-    // DIFFUSE
-    vec3 ld = normalize(toLightVector);
-    vec3 nd = normalize(normalVector);
+        // DIFFUSE
+        vec3 ld = normalize(toLightVector);
+        vec3 nd = normalize(normalVector);
+        vec3 vd = normalize(toViewVector);
 
-    float NDotL = max(dot(nd,ld),0);
-
-    vec4 diffuse = NDotL * lightColor;
+        float NDotL = max(dot(nd,ld),0.f);
 
 
-    finalOutColor = diffuse * outColor;
-    //finalOutColor = (diffuse + specular + ambient) * outColor;
+
+        vec3 halfVector = normalize(ld + vd);
+        float NDotH = max( 0.0, dot( nd, halfVector ) );
+
+        vec4 specularPart = vec4(1,0,0,1) * specularStrength  * (pow(NDotH,shininess));
+
+        vec4 diffusePart = NDotL * lightColor;
+
+        vec4 ambientPart = lightColor * ambient;
+
+
+        finalOutColor = (diffusePart + specularPart + ambientPart) * outColor;
+        //finalOutColor = (diffusePart + ambientPart) * outColor;
+        //finalOutColor = specularPart * outColor;
+    }
+    else {
+        // Do nothing with the color
+        finalOutColor = outColor;
+    }
+
 
 
 }
