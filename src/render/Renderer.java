@@ -16,12 +16,14 @@ import java.io.IOException;
 import java.nio.DoubleBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.opengl.GL20.glUniform3fv;
 import static org.lwjgl.opengl.GL33.*;
 
 public class Renderer {
     private int shaderProgram;
     private Camera camera;
     private Mat4 projectionPersp;
+    private AbstractRenderable lightBall = new GridTriangleStrip(50,50);
 
     private Mat4 projectionOrto;
     private OGLTexture2D texture;
@@ -116,10 +118,13 @@ public class Renderer {
         hole.setColorMode(2);
         scene.add(hole);
 
+        lightBall.setColorMode(6);
+        scene.add(lightBall);
+
         */
 
         mainObj = new GridTriangleStrip(100,100);
-        mainObj.setIdentifier(ShapeIdents.COS_WAVE);
+        mainObj.setIdentifier(ShapeIdents.COS_WAVE_ANIM);
         mainObj.setColorMode(0);
         scene.add(mainObj);
     }
@@ -144,6 +149,7 @@ public class Renderer {
         glUniform1f(loc_uRatio, ratio);
         glUniform1f(loc_uTime, time);
         glUniform3fv(loc_uCamPos, new float[] {(float) camera.getPosition().getX(),(float) camera.getPosition().getY(),(float) camera.getPosition().getZ()});
+        glUniformMatrix4fv(loc_uView, false, camera.getViewMatrix().floatArray());
 
         // No support for passing bool uniforms, workaround needed - GLSL treats bool as a special int
         glUniform1i(loc_uLight,useLight ? 1 : 0);
@@ -155,9 +161,6 @@ public class Renderer {
         else {
             glUniformMatrix4fv(loc_uProj, false, projectionOrto.floatArray());
         }
-
-        glUniformMatrix4fv(loc_uView, false, camera.getViewMatrix().floatArray());
-
 
         // Render scene
         for (AbstractRenderable renderable: scene.getSolids()) {
@@ -289,6 +292,7 @@ public class Renderer {
                     case GLFW_KEY_L:
                         useLight = !useLight;
                         break;
+
                 }
             }
         });

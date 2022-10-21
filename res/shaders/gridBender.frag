@@ -21,9 +21,9 @@ void main() {
     vec4 outColor;
 
 
-    // ITALIA
-    if (u_ColorMode == 5) {
-        outColor = vec4(origVertPos.x, origVertPos.y, origVertPos.x * origVertPos.y, 1);
+    // NORMAL
+    if (u_ColorMode == 0) {
+        outColor = vec4((normalize(normalVector) + 1.f) / 2.f, 1.f);
     }
     // BLUE GREEN
     else if (u_ColorMode == 1) {
@@ -42,9 +42,13 @@ void main() {
     else if (u_ColorMode == 4) {
         outColor = vec4(0.1,0.1,0.1,1);
     }
-    // NORMAL
-    else if (u_ColorMode == 0) {
-        outColor = vec4((normalize(normalVector) + 1.f) / 2.f, 1.f);
+    // ITALIA
+    else if (u_ColorMode == 5) {
+        outColor = vec4(origVertPos.x, origVertPos.y, origVertPos.x * origVertPos.y, 1);
+    }
+    // WHITE - LIGHT
+    else if (u_ColorMode == 6) {
+        outColor = vec4(1,1,1,1);
     }
     // DEFAULT RED
     else {
@@ -52,10 +56,10 @@ void main() {
     }
 
     // LIGHT
-    if (u_useLight) {
+    if (u_useLight && u_ColorMode != 6) {
         vec4 lightColor = vec4(1,1,1,1);
         float shininess = 8;
-        float ambient = 0.01;
+        float ambient = 0.1;
         float specularStrength = 3;
 
         // DIFFUSE
@@ -68,7 +72,7 @@ void main() {
 
 
         vec3 halfVector = normalize(ld + vd);
-        float NDotH = max( 0.0, dot( nd, halfVector ) );
+        float NDotH = max(0.0,dot(nd, halfVector));
 
         vec4 specularPart = vec4(1,0,0,1) * specularStrength  * (pow(NDotH,shininess));
 
@@ -79,6 +83,7 @@ void main() {
 
         //finalOutColor = (diffusePart + specularPart + ambientPart) * outColor;
         finalOutColor = (diffusePart + ambientPart) * outColor;
+        //finalOutColor = diffusePart * outColor;
         //finalOutColor = specularPart * outColor;
     }
     else {

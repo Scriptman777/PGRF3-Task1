@@ -7,6 +7,7 @@ uniform mat4 u_Model;
 uniform mat4 u_View;
 uniform mat4 u_Proj;
 uniform vec3 u_CamPos;
+uniform vec3 u_LightPos;
 
 uniform int u_shapeID;
 uniform float u_Ratio;
@@ -211,7 +212,7 @@ void main() {
     vec4 objectPositionVM = u_View * u_Model * vec4(transformedPos, 1.f);
 
 
-    vec4 lightSourcePos = u_View * u_Model * vec4(vec3(0, 0, 0.2), 1.f); // This will be uniform
+    vec4 lightSourcePos = u_View * u_Model * vec4(vec3(0,3*sin(u_Time/2),0.2f), 1.f);
 
     toLightVector = lightSourcePos.xyz - objectPositionVM.xyz;
 
