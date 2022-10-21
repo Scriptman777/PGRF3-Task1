@@ -60,7 +60,7 @@ void main() {
         vec4 lightColor = vec4(1,1,1,1);
         float shininess = 8;
         float ambient = 0.1;
-        float specularStrength = 3;
+        float specularStrength = 0.1;
 
         // DIFFUSE
         vec3 ld = normalize(toLightVector);
@@ -81,8 +81,8 @@ void main() {
         vec4 ambientPart = lightColor * ambient;
 
 
-        //finalOutColor = (diffusePart + specularPart + ambientPart) * outColor;
-        finalOutColor = (diffusePart + ambientPart) * outColor;
+        finalOutColor = (diffusePart + specularPart + ambientPart) * outColor;
+        //finalOutColor = (diffusePart + ambientPart) * outColor;
         //finalOutColor = diffusePart * outColor;
         //finalOutColor = specularPart * outColor;
     }
