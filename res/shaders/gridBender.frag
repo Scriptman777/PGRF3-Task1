@@ -22,7 +22,7 @@ void main() {
 
 
     // ITALIA
-    if (u_ColorMode == 0) {
+    if (u_ColorMode == 5) {
         outColor = vec4(origVertPos.x, origVertPos.y, origVertPos.x * origVertPos.y, 1);
     }
     // BLUE GREEN
@@ -43,7 +43,7 @@ void main() {
         outColor = vec4(0.1,0.1,0.1,1);
     }
     // NORMAL
-    else if (u_ColorMode == 5) {
+    else if (u_ColorMode == 0) {
         outColor = vec4(normalVector.xyz,1);
     }
     // DEFAULT RED
@@ -60,7 +60,7 @@ void main() {
 
         // DIFFUSE
         vec3 ld = normalize(toLightVector);
-        vec3 nd = normalize(normalVector);
+        vec3 nd = -normalize(normalVector);
         vec3 vd = normalize(toViewVector);
 
         float NDotL = max(dot(nd,ld),0.f);
@@ -77,8 +77,8 @@ void main() {
         vec4 ambientPart = lightColor * ambient;
 
 
-        finalOutColor = (diffusePart + specularPart + ambientPart) * outColor;
-        //finalOutColor = (diffusePart + ambientPart) * outColor;
+        //finalOutColor = (diffusePart + specularPart + ambientPart) * outColor;
+        finalOutColor = (diffusePart + ambientPart) * outColor;
         //finalOutColor = specularPart * outColor;
     }
     else {

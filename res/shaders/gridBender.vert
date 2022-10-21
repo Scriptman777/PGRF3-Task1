@@ -72,16 +72,6 @@ vec3 cylindricalConvert(vec3 calcPos) {
     return vec3(x,y,z);
 }
 
-
-vec3 getNormal() {
-
-
-    // TODO
-    return vec3(0,0,-1);
-
-
-}
-
 vec3 getPosition(vec2 pos){
 
     float x,y,z;
@@ -198,9 +188,25 @@ vec3 getPosition(vec2 pos){
     return calcPos;
 }
 
+vec3 getNormal() {
+
+    float diffU, diffV = 0.01;
+
+    vec3 dU = getPosition(vec2(inPos.x + diffU,inPos.y)) - getPosition(vec2(inPos.x - diffU,inPos.y));
+    vec3 dV = getPosition(vec2(inPos.x,inPos.y + diffV)) - getPosition(vec2(inPos.x,inPos.y - diffV));
+
+    //return cross(dU, dV);
+
+
+
+    return vec3(0,0,1);
+}
+
 void main() {
 
     vec3 transformedPos = getPosition(inPos);
+
+
 
     // LIGHT
 
@@ -213,7 +219,7 @@ void main() {
 
     toLightVector = lightSourcePos.xyz - objectPositionVM.xyz;
 
-    mat3 normalMatrix = transpose(inverse(mat3(u_View*u_Model)));
+    mat3 normalMatrix = transpose(inverse(mat3(u_Model * u_View)));
 
     normalVector = normalMatrix * getNormal();
 
