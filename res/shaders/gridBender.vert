@@ -23,8 +23,7 @@ out vec3 toViewVector;
 // Prepare for cartesian object
 vec3 initCartesian(vec2 coords) {
     float x_cart, y_cart, z_cart;
-    vec3 tempPos = vec3(coords, 1.f);
-    vec3 pos = tempPos * u_Ratio - (u_Ratio/2);
+    vec2 pos = coords * u_Ratio - (u_Ratio/2);
     x_cart = pos.x;
     y_cart = pos.y;
     z_cart = 1.f;
@@ -195,18 +194,15 @@ vec3 getNormal() {
     vec3 dU = getPosition(vec2(inPos.x + diffU,inPos.y)) - getPosition(vec2(inPos.x - diffU,inPos.y));
     vec3 dV = getPosition(vec2(inPos.x,inPos.y + diffV)) - getPosition(vec2(inPos.x,inPos.y - diffV));
 
-    //return cross(dU, dV);
+    return cross(dU, dV);
 
 
-
-    return vec3(0,0,1);
+    //return vec3(0,0,1);
 }
 
 void main() {
 
     vec3 transformedPos = getPosition(inPos);
-
-
 
     // LIGHT
 
@@ -219,7 +215,7 @@ void main() {
 
     toLightVector = lightSourcePos.xyz - objectPositionVM.xyz;
 
-    mat3 normalMatrix = transpose(inverse(mat3(u_Model * u_View)));
+    mat3 normalMatrix = transpose(inverse(mat3(u_View * u_Model)));
 
     normalVector = normalMatrix * getNormal();
 

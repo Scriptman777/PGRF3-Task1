@@ -44,7 +44,7 @@ void main() {
     }
     // NORMAL
     else if (u_ColorMode == 0) {
-        outColor = vec4(normalVector.xyz,1);
+        outColor = vec4((normalize(normalVector) + 1.f) / 2.f, 1.f);
     }
     // DEFAULT RED
     else {

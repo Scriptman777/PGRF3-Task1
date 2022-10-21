@@ -119,7 +119,7 @@ public class Renderer {
         */
 
         mainObj = new GridTriangleStrip(100,100);
-        mainObj.setIdentifier(ShapeIdents.DEFAULT);
+        mainObj.setIdentifier(ShapeIdents.COS_WAVE);
         mainObj.setColorMode(0);
         scene.add(mainObj);
     }
