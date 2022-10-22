@@ -19,10 +19,15 @@ out vec3 computedVertPos;
 out vec3 toLightVector;
 out vec3 normalVector;
 out vec3 toViewVector;
+out float lightDistance;
+
+// Bool varying not allowed, has to be int...
+flat out int isPolar;
 
 
 // Prepare for cartesian object
 vec3 initCartesian(vec2 coords) {
+    isPolar = 0;
     float x_cart, y_cart, z_cart;
     vec2 pos = coords * u_Ratio - (u_Ratio/2);
     x_cart = pos.x;
@@ -33,6 +38,7 @@ vec3 initCartesian(vec2 coords) {
 
 // Prepare for polar object
 vec3 initPolar(vec2 coords) {
+    isPolar = 1;
     float phi, theta;
     phi = coords.x * radians(360.f);
     theta = coords.y * radians(180.f);
@@ -106,9 +112,7 @@ vec3 getPosition(vec2 pos){
     // CANDY
     else if (u_shapeID == 4) {
         calcPos = initCartesian(pos);
-        calcPos.y = calcPos.y;
-        calcPos.z = sin(calcPos.x);
-        calcPos.x = cos(calcPos.x)*cos(calcPos.y);
+        calcPos.z = cos(calcPos.y*abs(sin(u_Time)));
     }
 
     // ======================
@@ -118,11 +122,10 @@ vec3 getPosition(vec2 pos){
     // z - r
     // ======================
 
-
     // FRUIT
     else if (u_shapeID == 5) {
         calcPos = initPolar(pos);
-        calcPos.z = 3.f*cos(4.f*calcPos.x);
+        calcPos.z = abs(cos(4.f*calcPos.x));
         calcPos = sphericalConvert(calcPos);
     }
     // SHELL
@@ -140,7 +143,7 @@ vec3 getPosition(vec2 pos){
     // SPACESHIP
     else if (u_shapeID == 8) {
         calcPos = initPolar(pos);
-        calcPos.z = log(calcPos.y) + cos(calcPos.x*4);
+        calcPos.z = abs(log(calcPos.y) + cos(calcPos.x*4));
         calcPos = sphericalConvert(calcPos);
     }
     // BALL
@@ -158,7 +161,7 @@ vec3 getPosition(vec2 pos){
     // PINECONE
     else if (u_shapeID == 10) {
         calcPos = initPolar(pos);
-        calcPos.z = cos(calcPos.y*6);
+        calcPos.z = abs(cos(calcPos.y*6));
         calcPos = sphericalConvert(calcPos);
     }
 
@@ -199,17 +202,16 @@ vec3 getPosition(vec2 pos){
 
 vec3 getNormal() {
 
-    float diff = 0.01;
+    float diff = 0.001;
 
     vec3 curPos = getPosition(inPos);
+
 
     vec3 dU = getPosition(vec2(inPos.x + diff,inPos.y)) - curPos;
     vec3 dV = getPosition(vec2(inPos.x,inPos.y + diff)) - curPos;
 
     return cross(dU, dV);
 
-
-    //return vec3(0,0,1);
 }
 
 void main() {
@@ -226,6 +228,8 @@ void main() {
     vec4 lightSourcePos = u_View * u_Model * vec4(u_LightPos, 1.f);
 
     toLightVector = lightSourcePos.xyz - objectPositionVM.xyz;
+
+    lightDistance = length(toLightVector);
 
     mat3 normalMatrix = transpose(inverse(mat3(u_View * u_Model)));
 

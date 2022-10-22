@@ -6,13 +6,34 @@ in vec3 toLightVector;
 in vec3 normalVector;
 in vec3 toViewVector;
 
+flat in int isPolar;
+in float lightDistance;
+
 uniform int u_ColorMode;
 uniform int u_LightMode;
 uniform bool u_useLight;
+uniform bool u_useSpecular;
+uniform bool u_useDiffuse;
+uniform bool u_useAmbient;
 
 uniform sampler2D inTexture;
 
 out vec4 finalOutColor;
+
+vec4 combinePhong(vec4 ambientPart, vec4 diffusePart, vec4 specularPart) {
+    vec4 finalPhong = vec4(0.f,0.f,0.f,0.f);
+    // Allow toggle for parts
+    if (u_useAmbient){
+        finalPhong = finalPhong + ambientPart;
+    }
+    if (u_useDiffuse){
+        finalPhong = finalPhong + diffusePart;
+    }
+    if (u_useSpecular){
+        finalPhong = finalPhong + specularPart;
+    }
+    return finalPhong;
+}
 
 void main() {
 
@@ -58,26 +79,78 @@ void main() {
 
     // LIGHT
     if (u_useLight && u_ColorMode != 6) {
-        vec4 lightColor = vec4(1,1,1,1);
+        vec4 diffuseColor, ambientColor, specularColor;
         float shininess, ambientStrength, specularStrength;
+        float constantAttenuation = 1;
+        float linearAttenuation = 1;
+        float quadraticAttenuation = 0.5;
+        float att;
 
-        // SHINY
-        if (u_LightMode == 1) {
-            shininess = 80.f;
-            ambientStrength = 0.1;
-            specularStrength = 5;
-        }
-        // DEFAULT
-        else {
+        // MATTE WITH ATT
+        if (u_LightMode == 0) {
+            diffuseColor = vec4(1,1,1,1);
+            ambientColor = vec4(1,1,1,1);
+            specularColor = vec4(1,1,1,1);
             shininess = 8.f;
             ambientStrength = 0.1;
             specularStrength = 0.1;
+            att = 1.f / (constantAttenuation +
+            linearAttenuation * lightDistance +
+            quadraticAttenuation * lightDistance * lightDistance);
+        }
+        // SHINY
+        else if (u_LightMode == 1) {
+            diffuseColor = vec4(1,1,1,1);
+            ambientColor = vec4(1,1,1,1);
+            specularColor = vec4(1,1,1,1);
+            shininess = 30.f;
+            ambientStrength = 0.1;
+            specularStrength = 1;
+            att = 1.f;
+        }
+        // EXTREMELY SHINY
+        else if (u_LightMode == 2) {
+            diffuseColor = vec4(1,1,1,1);
+            ambientColor = vec4(1,1,1,1);
+            specularColor = vec4(1,1,1,1);
+            shininess = 80.f;
+            ambientStrength = 0.1;
+            specularStrength = 5;
+            att = 1.f;
+        }
+        // GREEN COLORED
+        else if (u_LightMode == 3) {
+            diffuseColor = vec4(0.5,0.9,0.5,1);
+            ambientColor = vec4(0.5,0.9,0.5,1);
+            specularColor = vec4(0.5,0.9,0.5,1);
+            shininess = 8.f;
+            ambientStrength = 0.1;
+            specularStrength = 0.1;
+            att = 1.f;
+        }
+        // OTHER - MATTE
+        else {
+            diffuseColor = vec4(1,1,1,1);
+            ambientColor = vec4(1,1,1,1);
+            specularColor = vec4(1,1,1,1);
+            shininess = 8.f;
+            ambientStrength = 0.1;
+            specularStrength = 0.1;
+            att = 1.f;
         }
 
 
         // DIFFUSE
+        vec3 nd;
+        if (isPolar == 1){
+            nd = -normalize(normalVector);
+        }
+        else {
+            nd = normalize(normalVector);
+        }
+
         vec3 ld = normalize(toLightVector);
-        vec3 nd = normalize(normalVector);
+
         vec3 vd = normalize(toViewVector);
 
         float NDotL = max(dot(nd,ld),0.f);
@@ -87,21 +160,18 @@ void main() {
         vec3 halfVector = normalize(ld + vd);
         float NDotH = max(0.0,dot(nd, halfVector));
 
-        vec4 specularPart = vec4(1,1,1,1) * specularStrength  * (pow(NDotH,shininess));
+        vec4 specularPart = specularColor * specularStrength  * (pow(NDotH,shininess));
 
-        vec4 diffusePart = NDotL * lightColor;
+        vec4 diffusePart = NDotL * diffuseColor;
 
-        vec4 ambientPart = lightColor * ambientStrength;
+        vec4 ambientPart = ambientColor * ambientStrength;
 
-
-        finalOutColor = (diffusePart + specularPart + ambientPart) * outColor;
+        finalOutColor = combinePhong(ambientPart, diffusePart, specularPart) * outColor * att;
 
     }
     else {
         // Do nothing with the color
         finalOutColor = outColor;
     }
-
-
 
 }

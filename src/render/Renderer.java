@@ -36,8 +36,11 @@ public class Renderer {
     private boolean wireframe = false;
     private boolean usePersp = true;
     private boolean useLight = true;
+    private boolean useAmbient = true;
+    private boolean useDiffuse = true;
+    private boolean useSpecular = true;
     private float camSpeed = 0.05f;
-    private float ratio = 6;
+    private float ratio = 7;
     private float time = 0;
     private float lightHeight = 0.7f;
 
@@ -55,6 +58,9 @@ public class Renderer {
     int loc_uCamPos;
     int loc_uLightPos;
     int loc_uLightMode;
+    int loc_uUseAmbient;
+    int loc_uUseDiffuse;
+    int loc_uUseSpecular;
 
     public Renderer(long window, int width, int height) {
         this.window = window;
@@ -90,10 +96,13 @@ public class Renderer {
         loc_uCamPos = glGetUniformLocation(shaderProgram,"u_CamPos");
         loc_uLightPos = glGetUniformLocation(shaderProgram,"u_LightPos");
         loc_uLightMode = glGetUniformLocation(shaderProgram,"u_LightMode");
+        loc_uUseAmbient = glGetUniformLocation(shaderProgram,"u_useAmbient");
+        loc_uUseDiffuse = glGetUniformLocation(shaderProgram,"u_useDiffuse");
+        loc_uUseSpecular = glGetUniformLocation(shaderProgram,"u_useSpecular");
 
         // Texture init
         try {
-            texture = new OGLTexture2D(TexturePaths.METAL);
+            texture = new OGLTexture2D(TexturePaths.GRAIN);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -122,8 +131,6 @@ public class Renderer {
         hole.setColorMode(2);
         scene.add(hole);
 
-
-
         */
 
 
@@ -131,7 +138,7 @@ public class Renderer {
         lightBall.setIdentifier(ShapeIdents.LIGHT);
         scene.add(lightBall);
 
-        mainObj = new GridTriangleStrip(100,100);
+        mainObj = new GridTriangleStrip(300,300);
         mainObj.setIdentifier(ShapeIdents.DONUT);
         mainObj.setColorMode(0);
         scene.add(mainObj);
@@ -162,6 +169,9 @@ public class Renderer {
 
         // No support for passing bool uniforms, workaround needed - GLSL treats bool as a special int
         glUniform1i(loc_uLight,useLight ? 1 : 0);
+        glUniform1i(loc_uUseAmbient,useAmbient ? 1 : 0);
+        glUniform1i(loc_uUseDiffuse,useDiffuse ? 1 : 0);
+        glUniform1i(loc_uUseSpecular,useSpecular ? 1 : 0);
 
         // Move light
         glUniform3fv(loc_uLightPos, new float[] {0, (float) (3.5*Math.sin(time/2)), lightHeight});
@@ -283,7 +293,9 @@ public class Renderer {
                         lightMode++;
                         break;
                     case GLFW_KEY_F:
-                        lightMode--;
+                        if (lightMode >= 1){
+                            lightMode--;
+                        }
                         break;
                     case GLFW_KEY_KP_ADD:
                         ratio+=0.5;
@@ -295,10 +307,21 @@ public class Renderer {
                         mainObj.setColorMode(mainObj.getColorMode()+1);
                         break;
                     case GLFW_KEY_G:
-                        mainObj.setColorMode(mainObj.getColorMode()-1);
+                        if (mainObj.getColorMode() >= 1) {
+                            mainObj.setColorMode(mainObj.getColorMode()-1);
+                        }
                         break;
                     case GLFW_KEY_O:
                         wireframe = !wireframe;
+                        break;
+                    case GLFW_KEY_KP_1:
+                        useAmbient = !useAmbient;
+                        break;
+                    case GLFW_KEY_KP_2:
+                        useDiffuse = !useDiffuse;
+                        break;
+                    case GLFW_KEY_KP_3:
+                        useSpecular = !useSpecular;
                         break;
                     case GLFW_KEY_P:
                         usePersp = !usePersp;
@@ -311,6 +334,14 @@ public class Renderer {
                         break;
                     case GLFW_KEY_KP_DIVIDE:
                         lightHeight -= 0.1;
+                        break;
+                    case GLFW_KEY_Y:
+                        mainObj.setIdentifier(mainObj.getIdentifier()+1);
+                        break;
+                    case GLFW_KEY_H:
+                        if (mainObj.getIdentifier() >= 1) {
+                            mainObj.setIdentifier(mainObj.getIdentifier()-1);
+                        }
                         break;
 
                 }
