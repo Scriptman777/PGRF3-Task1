@@ -204,8 +204,7 @@ vec3 getNormal() {
 
     float diff = 0.001;
 
-    vec3 curPos = getPosition(inPos);
-
+    vec3 curPos = getPosition(inPos) ;
 
     vec3 dU = getPosition(vec2(inPos.x + diff,inPos.y)) - curPos;
     vec3 dV = getPosition(vec2(inPos.x,inPos.y + diff)) - curPos;
@@ -222,10 +221,7 @@ void main() {
 
     // Position in view coords
     vec4 objectPositionVM = u_View * u_Model * vec4(transformedPos, 1.f);
-
-
-    //vec4 lightSourcePos = u_View * u_Model * vec4(vec3(0,3.5*sin(u_Time/2),0.7f), 1.f);
-    vec4 lightSourcePos = u_View * u_Model * vec4(u_LightPos, 1.f);
+    vec4 lightSourcePos = u_View * vec4(u_LightPos, 1.f);
 
     toLightVector = lightSourcePos.xyz - objectPositionVM.xyz;
 

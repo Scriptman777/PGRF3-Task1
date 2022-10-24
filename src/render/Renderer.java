@@ -121,17 +121,17 @@ public class Renderer {
         skybox.setModel(tempModel.mul(new Mat4Scale(10,10,10)));
         skybox.setColorMode(3);
         scene.add(skybox);
-
-
-
-        AbstractRenderable hole = new GridTriangleStrip(50,50);
-        hole.setIdentifier(ShapeIdents.HOLE_ANIM);
-        tempModel = hole.getModel();
-        hole.setModel(tempModel.mul(new Mat4RotXYZ(45,45,0).mul(new Mat4Transl(4,4,2.5))));
-        hole.setColorMode(2);
-        scene.add(hole);
-
         */
+
+
+        AbstractRenderable pinecone = new GridTriangleStrip(50,50);
+        pinecone.setIdentifier(ShapeIdents.PINECONE);
+        tempModel = pinecone.getModel();
+        pinecone.setModel(tempModel.mul(new Mat4Transl(4,4,2.5)));
+        pinecone.setColorMode(0);
+        scene.add(pinecone);
+
+
 
 
         lightBall.setColorMode(6);
@@ -342,6 +342,18 @@ public class Renderer {
                         if (mainObj.getIdentifier() >= 1) {
                             mainObj.setIdentifier(mainObj.getIdentifier()-1);
                         }
+                        break;
+                    case GLFW_KEY_KP_8:
+                        mainObj.setModel(mainObj.getModel().mul(new Mat4RotX(0.1)));
+                        break;
+                    case GLFW_KEY_KP_5:
+                        mainObj.setModel(mainObj.getModel().mul(new Mat4RotX(-0.1)));
+                        break;
+                    case GLFW_KEY_KP_4:
+                        mainObj.setModel(mainObj.getModel().mul(new Mat4RotY(0.1)));
+                        break;
+                    case GLFW_KEY_KP_6:
+                        mainObj.setModel(mainObj.getModel().mul(new Mat4RotY(-0.1)));
                         break;
 
                 }
