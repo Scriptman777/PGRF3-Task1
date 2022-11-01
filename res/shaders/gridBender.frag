@@ -17,6 +17,7 @@ uniform bool u_useDiffuse;
 uniform bool u_useAmbient;
 
 uniform sampler2D inTexture;
+uniform sampler2D inTexNormal;
 
 out vec4 finalOutColor;
 
@@ -35,13 +36,20 @@ vec4 combinePhong(vec4 ambientPart, vec4 diffusePart, vec4 specularPart) {
     return finalPhong;
 }
 
-void main() {
+vec3 loadNormalMap() {
+    vec4 norm = texture(inTexNormal, origVertPos);
+    vec3 transNorm = 2 * (norm.rgb - 0.5);
 
-    vec3 plasmaColor1 = vec3(1.9,0.55,0);
-    vec3 plasmaColor2 = vec3(0.226,0.000,0.615);
+    return transNorm;
+}
+
+void main() {
 
     vec4 outColor;
 
+    vec3 mapNormal = loadNormalMap();
+
+    // TODO: Add toggle for normalMap
 
     // NORMAL
     if (u_ColorMode == 0) {
@@ -53,6 +61,8 @@ void main() {
     }
     // PLASMA - DIAGONAL
     else if (u_ColorMode == 2) {
+        vec3 plasmaColor1 = vec3(1.9,0.55,0);
+        vec3 plasmaColor2 = vec3(0.226,0.000,0.615);
         vec3 mixed = mix(plasmaColor1,plasmaColor2,sqrt((pow(origVertPos.x,2.f)+(pow(origVertPos.y,2.f)))));
         outColor = vec4(mixed, 1.f);
     }
@@ -60,9 +70,9 @@ void main() {
     else if (u_ColorMode == 3) {
         outColor = texture(inTexture, origVertPos);
     }
-    // BLACK
+    // NORMAL TEXTURE
     else if (u_ColorMode == 4) {
-        outColor = vec4(0.1,0.1,0.1,1);
+        outColor = texture(inTexNormal, origVertPos);
     }
     // ITALIA
     else if (u_ColorMode == 5) {
@@ -154,7 +164,6 @@ void main() {
         vec3 vd = normalize(toViewVector);
 
         float NDotL = max(dot(nd,ld),0.f);
-
 
 
         vec3 halfVector = normalize(ld + vd);

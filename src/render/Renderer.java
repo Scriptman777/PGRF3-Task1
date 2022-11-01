@@ -26,6 +26,7 @@ public class Renderer {
 
     private Mat4 projectionOrto;
     private OGLTexture2D texture;
+    private OGLTexture2D textureNormal;
     private Scene scene = new Scene();
     private long window;
 
@@ -102,7 +103,8 @@ public class Renderer {
 
         // Texture init
         try {
-            texture = new OGLTexture2D(TexturePaths.GRAIN);
+            texture = new OGLTexture2D(TexturePaths.BRICKS);
+            textureNormal = new OGLTexture2D(TexturePaths.BRICKS_NORM);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -155,7 +157,8 @@ public class Renderer {
         }
 
         // Bind texture
-        texture.bind();
+        texture.bind(shaderProgram,"inTexture",0);
+        textureNormal.bind(shaderProgram,"inTexNormal",1);
 
         // Shader
         glUseProgram(shaderProgram);
