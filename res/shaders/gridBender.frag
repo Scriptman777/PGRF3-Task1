@@ -45,6 +45,31 @@ vec3 loadNormalMap() {
 
 void main() {
 
+    // CREATE TBN
+    // Based on https://stackoverflow.com/questions/5255806/how-to-calculate-tangent-and-binormal
+    // compute derivations of the world position
+    vec3 p_dx = dFdx(computedVertPos);
+    vec3 p_dy = dFdy(computedVertPos);
+    // compute derivations of the texture coordinate
+    vec2 tc_dx = dFdx(origVertPos);
+    vec2 tc_dy = dFdy(origVertPos);
+    // compute initial tangent and bi-tangent
+    vec3 t = normalize( tc_dy.y * p_dx - tc_dx.y * p_dy );
+    vec3 b = normalize( tc_dy.x * p_dx - tc_dx.x * p_dy ); // sign inversion
+    // get new tangent from a given mesh normal
+    vec3 n = normalize(normalVector);
+    vec3 x = cross(n, t);
+    t = cross(x, n);
+    t = normalize(t);
+    // get updated bi-tangent
+    x = cross(b, n);
+    b = cross(n, x);
+    b = normalize(b);
+    mat3 TBN = mat3(t, b, n);
+
+    vec3 toViewVectorTang = TBN * toViewVector;
+    vec3 toLightVectorTang = TBN * toLightVector;
+
     vec4 outColor;
 
     vec3 mapNormal = loadNormalMap();
