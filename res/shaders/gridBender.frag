@@ -184,9 +184,9 @@ void main() {
             nd = normalize(normalVector);
         }
 
-        vec3 ld = normalize(toLightVector);
+        vec3 ld = normalize(toLightVectorTang);
 
-        vec3 vd = normalize(toViewVector);
+        vec3 vd = normalize(toViewVectorTang);
 
         float NDotL = max(dot(nd,ld),0.f);
 
