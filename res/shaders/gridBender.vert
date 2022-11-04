@@ -21,11 +21,14 @@ out vec3 normalVector;
 out vec3 toViewVector;
 out float lightDistance;
 
+
 // Bool varying not allowed, has to be int...
 flat out int isPolar;
 
 uniform sampler2D inTexNormal;
 
+float diff = 0.001;
+vec3 tangentVector, biTangentVector;
 
 // Prepare for cartesian object
 vec3 initCartesian(vec2 coords) {
@@ -204,23 +207,23 @@ vec3 getPosition(vec2 pos){
 
 vec3 getNormal() {
 
-    float diff = 0.001;
 
-    vec3 curPos = getPosition(inPos) ;
 
-    vec3 dU = getPosition(vec2(inPos.x + diff,inPos.y)) - curPos;
-    vec3 dV = getPosition(vec2(inPos.x,inPos.y + diff)) - curPos;
+    vec3 curPos = getPosition(inPos);
 
-    return cross(dU, dV);
+    tangentVector = getPosition(vec2(inPos.x + diff,inPos.y)) - curPos;
+    biTangentVector = getPosition(vec2(inPos.x,inPos.y + diff)) - curPos;
+
+    return cross(tangentVector, biTangentVector);
 
 }
 
 vec3 getTangent() {
 
-    //TODO: Implement
+    vec3 curPos = getPosition(inPos);
+    vec3 tan = getPosition(vec2(inPos.x + diff,inPos.y)) - curPos;
 
     return vec3(0);
-
 }
 
 void main() {
@@ -230,29 +233,43 @@ void main() {
     // LIGHT
 
     // Position in view coords
-    vec4 objectPositionVM = u_View * u_Model * vec4(transformedPos, 1.f);
+    mat4 VM = u_View * u_Model;
+
+    vec4 objectPositionVM = VM * vec4(transformedPos, 1.f);
     vec4 lightSourcePos = u_View * vec4(u_LightPos, 1.f);
 
     toLightVector = lightSourcePos.xyz - objectPositionVM.xyz;
+    toViewVector = - objectPositionVM.xyz;
 
     lightDistance = length(toLightVector);
 
-    mat3 normalMatrix = transpose(inverse(mat3(u_View * u_Model)));
-
-    normalVector = normalMatrix * getNormal();
-
-    vec3 tangentVector = u_View * getTangent();
-
-    vec3 biTangentVector = cross(normalize(normalVector), normalize(tangentVector));
-
-    mat3 TBN = (tangentVector, normalVector, biTangentVector);
-
-    toViewVector = - objectPositionVM.xyz;
 
 
+
+    mat3 normalMatrix = transpose(inverse(mat3(VM)));
+
+    normalVector = normalize(normalMatrix * getNormal());
+
+    /*
+    tangentVector = normalize(mat3(VM) * getTangent());
+
+    biTangentVector = cross(normalVector, tangentVector);
+    */
+    vec3 tangentVectorCross = normalize(cross(biTangentVector, normalVector));
+
+
+    mat3 TBN = mat3(normalize(tangentVector), normalize(biTangentVector), normalVector);
+
+
+/*
     // Convert to tangent space
     toLightVector = toLightVector * TBN;
     toViewVector = toViewVector * TBN;
+*/
+
+    // NOT convert to tangent space
+    toLightVector = toLightVector;
+    toViewVector = toViewVector;
 
 
     // Proj and pass

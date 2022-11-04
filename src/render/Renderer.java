@@ -136,7 +136,7 @@ public class Renderer {
 
 
 
-        lightBall.setColorMode(6);
+        lightBall.setColorMode(100);
         lightBall.setIdentifier(ShapeIdents.LIGHT);
         scene.add(lightBall);
 

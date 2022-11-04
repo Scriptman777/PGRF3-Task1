@@ -55,31 +55,44 @@ void main() {
     if (u_ColorMode == 0) {
         outColor = vec4((normalize(normalVector) + 1.f) / 2.f, 1.f);
     }
-    // BLUE GREEN
+    // VIEW POSITION
     else if (u_ColorMode == 1) {
-        outColor = vec4(origVertPos.x * origVertPos.y, origVertPos.x, origVertPos.y, 1);
+        vec3 colorView = - (toViewVector * 2);
+        outColor = vec4(colorView.xyz,1.f);
     }
-    // PLASMA - DIAGONAL
+    // DEPTH
     else if (u_ColorMode == 2) {
+        outColor = vec4(gl_FragCoord.www,1.f);
+    }
+    // TEX COORD
+    else if (u_ColorMode == 3) {
         vec3 plasmaColor1 = vec3(1.9,0.55,0);
         vec3 plasmaColor2 = vec3(0.226,0.000,0.615);
         vec3 mixed = mix(plasmaColor1,plasmaColor2,sqrt((pow(origVertPos.x,2.f)+(pow(origVertPos.y,2.f)))));
         outColor = vec4(mixed, 1.f);
     }
+    // LIGHT DIST
+    else if (u_ColorMode == 4) {
+        outColor = vec4(1-lightDistance/3,1-lightDistance/3,0, 1);
+    }
     // TEXTURE
-    else if (u_ColorMode == 3) {
+    else if (u_ColorMode == 5) {
         outColor = texture(inTexture, origVertPos);
     }
     // NORMAL TEXTURE
-    else if (u_ColorMode == 4) {
+    else if (u_ColorMode == 6) {
         outColor = texture(inTexNormal, origVertPos);
     }
     // ITALIA
-    else if (u_ColorMode == 5) {
+    else if (u_ColorMode == 7) {
         outColor = vec4(origVertPos.x, origVertPos.y, origVertPos.x * origVertPos.y, 1);
     }
+    // BLUE GREEN
+    else if (u_ColorMode == 8) {
+        outColor = vec4(origVertPos.x * origVertPos.y, origVertPos.x, origVertPos.y, 1);
+    }
     // WHITE - LIGHT
-    else if (u_ColorMode == 6) {
+    else if (u_ColorMode == 100) {
         outColor = vec4(1,1,1,1);
     }
     // DEFAULT RED
@@ -88,7 +101,7 @@ void main() {
     }
 
     // LIGHT
-    if (u_useLight && u_ColorMode != 6) {
+    if (u_useLight && u_ColorMode != 100) {
         vec4 diffuseColor, ambientColor, specularColor;
         float shininess, ambientStrength, specularStrength;
         float constantAttenuation = 1;
