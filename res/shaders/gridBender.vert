@@ -215,14 +215,6 @@ vec3 getNormal() {
 
 }
 
-vec3 getTangent() {
-
-    //TODO: Implement
-
-    return vec3(0);
-
-}
-
 void main() {
 
     vec3 transformedPos = getPosition(inPos);
@@ -241,18 +233,7 @@ void main() {
 
     normalVector = normalMatrix * getNormal();
 
-    vec3 tangentVector = u_View * getTangent();
-
-    vec3 biTangentVector = cross(normalize(normalVector), normalize(tangentVector));
-
-    mat3 TBN = (tangentVector, normalVector, biTangentVector);
-
     toViewVector = - objectPositionVM.xyz;
-
-
-    // Convert to tangent space
-    toLightVector = toLightVector * TBN;
-    toViewVector = toViewVector * TBN;
 
 
     // Proj and pass
