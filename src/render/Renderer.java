@@ -34,7 +34,7 @@ public class Renderer {
     private int lightMode = 0;
     private double ox, oy;
     private boolean mouseButton1 = false;
-    private boolean wireframe = false;
+    private int renderingMode = 0;
     private boolean usePersp = true;
     private boolean useLight = true;
     private boolean useAmbient = true;
@@ -149,11 +149,16 @@ public class Renderer {
 
     public void draw() {
 
-        if (wireframe) {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        }
-        else {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        switch (renderingMode) {
+            case 0:
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+                break;
+            case 1:
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+                break;
+            case 2:
+                glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+                break;
         }
 
         // Bind texture
@@ -315,7 +320,7 @@ public class Renderer {
                         }
                         break;
                     case GLFW_KEY_O:
-                        wireframe = !wireframe;
+                        renderingMode = renderingMode == 2 ? 0 : renderingMode + 1;
                         break;
                     case GLFW_KEY_KP_1:
                         useAmbient = !useAmbient;

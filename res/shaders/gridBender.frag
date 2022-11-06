@@ -105,10 +105,14 @@ void main() {
         vec4 diffuseColor, ambientColor, specularColor;
         float shininess, ambientStrength, specularStrength;
         float constantAttenuation = 1;
-        float linearAttenuation = 1;
-        float quadraticAttenuation = 0.5;
+        float linearAttenuation = 0.1;
+        float quadraticAttenuation = 0.05;
         float att;
+        float spotCutOff;
+        vec3 spotDirection;
 
+
+        bool isSpot = false;
         // MATTE WITH ATT
         if (u_LightMode == 0) {
             diffuseColor = vec4(1,1,1,1);
@@ -141,8 +145,36 @@ void main() {
             specularStrength = 5;
             att = 1.f;
         }
-        // GREEN COLORED
+        // SHINY WITH ATT ON VIEW
         else if (u_LightMode == 3) {
+            diffuseColor = vec4(1,1,1,1);
+            ambientColor = vec4(1,1,1,1);
+            specularColor = vec4(1,1,1,1);
+            shininess = 30.f;
+            ambientStrength = 0.1;
+            specularStrength = 1;
+            linearAttenuation = 1.f;
+            att = 1.f / (constantAttenuation +
+            linearAttenuation * lightDistance +
+            quadraticAttenuation * lightDistance * lightDistance);
+        }
+        // SPOT
+        else if (u_LightMode == 4) {
+            diffuseColor = vec4(1,1,1,1);
+            ambientColor = vec4(1,1,1,1);
+            specularColor = vec4(1,1,1,1);
+            shininess = 30.f;
+            ambientStrength = 0.05;
+            specularStrength = 1;
+            att = 1.f / (constantAttenuation +
+            linearAttenuation * lightDistance +
+            quadraticAttenuation * lightDistance * lightDistance);
+            isSpot = true;
+            spotCutOff = 0.97;
+            spotDirection = vec3(0,0,-1);
+        }
+        // GREEN
+        else if (u_LightMode == 5) {
             diffuseColor = vec4(0.5,0.9,0.5,1);
             ambientColor = vec4(0.5,0.9,0.5,1);
             specularColor = vec4(0.5,0.9,0.5,1);
@@ -178,7 +210,6 @@ void main() {
 
         float NDotL = max(dot(nd,ld),0.f);
 
-
         vec3 halfVector = normalize(ld + vd);
         float NDotH = max(0.0,dot(nd, halfVector));
 
@@ -188,7 +219,17 @@ void main() {
 
         vec4 ambientPart = ambientColor * ambientStrength;
 
-        finalOutColor = combinePhong(ambientPart, diffusePart, specularPart) * outColor * att;
+        float spotEffect = dot(normalize(spotDirection),-ld);
+
+        if (isSpot){
+            float blend = clamp((spotEffect-spotCutOff)/(1-spotCutOff),0.0,1.0);
+            vec4 phongColor = combinePhong(ambientPart, diffusePart, specularPart) * outColor * att;
+            finalOutColor = mix(ambientPart*outColor,phongColor,blend);
+        }
+        else {
+            finalOutColor = combinePhong(ambientPart, diffusePart, specularPart) * outColor * att;
+        }
+
 
     }
     else {

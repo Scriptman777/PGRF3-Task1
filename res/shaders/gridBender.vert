@@ -8,6 +8,7 @@ uniform mat4 u_View;
 uniform mat4 u_Proj;
 uniform vec3 u_CamPos;
 uniform vec3 u_LightPos;
+uniform int u_LightMode;
 
 uniform int u_shapeID;
 uniform float u_Ratio;
@@ -236,7 +237,15 @@ void main() {
     mat4 VM = u_View * u_Model;
 
     vec4 objectPositionVM = VM * vec4(transformedPos, 1.f);
-    vec4 lightSourcePos = u_View * vec4(u_LightPos, 1.f);
+    vec4 lightSourcePos;
+    if (u_LightMode == 3 || u_LightMode == 4) {
+        // Light on viewer
+        lightSourcePos = vec4(0,0,0,1.f);
+    }
+    else {
+        lightSourcePos = u_View * vec4(u_LightPos, 1.f);
+    }
+
 
     toLightVector = lightSourcePos.xyz - objectPositionVM.xyz;
     toViewVector = - objectPositionVM.xyz;
@@ -261,16 +270,16 @@ void main() {
     mat3 TBN = mat3(normalize(tangentVector), normalize(biTangentVector), normalVector);
 
 
-/*
-    // Convert to tangent space
-    toLightVector = toLightVector * TBN;
-    toViewVector = toViewVector * TBN;
-*/
 
-    // NOT convert to tangent space
+    // Convert to tangent space
     toLightVector = toLightVector;
     toViewVector = toViewVector;
 
+    /*
+    // NOT convert to tangent space
+    toLightVector = toLightVector;
+    toViewVector = toViewVector;
+    */
 
     // Proj and pass
     vec4 postMVP = u_Proj * objectPositionVM;
