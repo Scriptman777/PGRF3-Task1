@@ -15,6 +15,7 @@ uniform bool u_useLight;
 uniform bool u_useSpecular;
 uniform bool u_useDiffuse;
 uniform bool u_useAmbient;
+uniform float u_Time;
 
 uniform sampler2D inTexture;
 uniform sampler2D inTexNormal;
@@ -158,7 +159,7 @@ void main() {
             linearAttenuation * lightDistance +
             quadraticAttenuation * lightDistance * lightDistance);
         }
-        // SPOT
+        // SPOT "FLASHLIGHT"
         else if (u_LightMode == 4) {
             diffuseColor = vec4(1,1,1,1);
             ambientColor = vec4(1,1,1,1);
@@ -171,7 +172,7 @@ void main() {
             quadraticAttenuation * lightDistance * lightDistance);
             isSpot = true;
             spotCutOff = 0.97;
-            spotDirection = vec3(0,0,-1);
+            spotDirection = vec3(0.05*sin(u_Time/2),0.05*cos(u_Time),-1);
         }
         // GREEN
         else if (u_LightMode == 5) {
