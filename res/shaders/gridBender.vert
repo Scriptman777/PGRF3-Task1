@@ -108,7 +108,8 @@ vec3 getPosition(vec2 pos){
     // COS wave
     else if (u_shapeID == 2) {
         calcPos = initCartesian(pos);
-        calcPos.z = 0.5 * cos(sqrt(20.f * pow(calcPos.x, 2.f) + 20 * pow(calcPos.y, 2.f)));
+        //calcPos.z = 0.5 * cos(sqrt(20.f * pow(calcPos.x, 2.f) + 20 * pow(calcPos.y, 2.f)));
+        calcPos.z = 0.f;
     }
     // COS wave anim
     else if (u_shapeID == 3) {
@@ -206,25 +207,14 @@ vec3 getPosition(vec2 pos){
     return calcPos;
 }
 
-vec3 getNormal() {
-
-
-
-    vec3 curPos = getPosition(inPos);
-
-    tangentVector = getPosition(vec2(inPos.x + diff,inPos.y)) - curPos;
-    biTangentVector = getPosition(vec2(inPos.x,inPos.y + diff)) - curPos;
-
-    return cross(tangentVector, biTangentVector);
-
+vec3 getNormal(float x, float y) {
+    vec3 dx = vec3(getPosition(vec2(x + diff, y)) - getPosition(vec2(x, y)));
+    vec3 dy = vec3(getPosition(vec2(x, y + diff)) - getPosition(vec2(x, y)));
+    return cross(dx, dy);
 }
 
-vec3 getTangent() {
-
-    vec3 curPos = getPosition(inPos);
-    vec3 tan = getPosition(vec2(inPos.x + diff,inPos.y)) - curPos;
-
-    return vec3(0);
+vec3 getTangent(float x, float y) {
+    return vec3(getPosition(vec2(x + diff, y)) - getPosition(vec2(x, y)));
 }
 
 void main() {
@@ -257,14 +247,9 @@ void main() {
 
     mat3 normalMatrix = transpose(inverse(mat3(VM)));
 
-    normalVector = normalize(normalMatrix * getNormal());
-
-    /*
-    tangentVector = normalize(mat3(VM) * getTangent());
-
-    biTangentVector = cross(normalVector, tangentVector);
-    */
-    vec3 tangentVectorCross = normalize(cross(biTangentVector, normalVector));
+    normalVector = normalize(normalMatrix * getNormal(inPos.x, inPos.y));
+    tangentVector = normalize(mat3(VM) * getTangent(inPos.x, inPos.y));
+    biTangentVector = normalize(cross(tangentVector, normalVector));
 
 
     mat3 TBN = mat3(normalize(tangentVector), normalize(biTangentVector), normalVector);
@@ -272,8 +257,8 @@ void main() {
 
 
     // Convert to tangent space
-    toLightVector = toLightVector;
-    toViewVector = toViewVector;
+    toLightVector = toLightVector * TBN;
+    toViewVector = toViewVector * TBN;
 
     /*
     // NOT convert to tangent space

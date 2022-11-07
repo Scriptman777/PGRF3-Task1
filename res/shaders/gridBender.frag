@@ -54,7 +54,7 @@ void main() {
 
     // NORMAL
     if (u_ColorMode == 0) {
-        outColor = vec4((normalize(normalVector) + 1.f) / 2.f, 1.f);
+        outColor = texture(inTexture, origVertPos);
     }
     // VIEW POSITION
     else if (u_ColorMode == 1) {
@@ -199,10 +199,10 @@ void main() {
         // DIFFUSE
         vec3 nd;
         if (isPolar == 1){
-            nd = -normalize(normalVector);
+            nd = -normalize(mapNormal);
         }
         else {
-            nd = normalize(normalVector);
+            nd = normalize(mapNormal);
         }
 
         vec3 ld = normalize(toLightVector);
