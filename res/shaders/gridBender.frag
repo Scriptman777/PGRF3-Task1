@@ -5,6 +5,7 @@ in vec3 computedVertPos;
 in vec3 toLightVector;
 in vec3 normalVector;
 in vec3 toViewVector;
+in mat3 TBN;
 
 flat in int isPolar;
 in float lightDistance;
@@ -52,7 +53,7 @@ void main() {
 
     // TODO: Add toggle for normalMap
 
-    // NORMAL
+    // TEXTURED
     if (u_ColorMode == 0) {
         outColor = texture(inTexture, origVertPos);
     }
@@ -76,9 +77,9 @@ void main() {
     else if (u_ColorMode == 4) {
         outColor = vec4(1-lightDistance/3,1-lightDistance/3,0, 1);
     }
-    // TEXTURE
+    // NORMAL
     else if (u_ColorMode == 5) {
-        outColor = texture(inTexture, origVertPos);
+        outColor = vec4((normalize(normalVector) + 1.f) / 2.f, 1.f);
     }
     // NORMAL TEXTURE
     else if (u_ColorMode == 6) {
@@ -172,7 +173,7 @@ void main() {
             quadraticAttenuation * lightDistance * lightDistance);
             isSpot = true;
             spotCutOff = 0.97;
-            spotDirection = vec3(0.05*sin(u_Time/2),0.05*cos(u_Time),-1);
+            spotDirection = vec3(0.05*sin(u_Time/2),0.05*cos(u_Time),-1) * TBN;
         }
         // GREEN
         else if (u_LightMode == 5) {

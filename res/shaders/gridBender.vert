@@ -21,6 +21,7 @@ out vec3 toLightVector;
 out vec3 normalVector;
 out vec3 toViewVector;
 out float lightDistance;
+out mat3 TBN;
 
 
 // Bool varying not allowed, has to be int...
@@ -108,8 +109,7 @@ vec3 getPosition(vec2 pos){
     // COS wave
     else if (u_shapeID == 2) {
         calcPos = initCartesian(pos);
-        //calcPos.z = 0.5 * cos(sqrt(20.f * pow(calcPos.x, 2.f) + 20 * pow(calcPos.y, 2.f)));
-        calcPos.z = 0.f;
+        calcPos.z = 0.5 * cos(sqrt(20.f * pow(calcPos.x, 2.f) + 20 * pow(calcPos.y, 2.f)));
     }
     // COS wave anim
     else if (u_shapeID == 3) {
@@ -252,19 +252,11 @@ void main() {
     biTangentVector = normalize(cross(tangentVector, normalVector));
 
 
-    mat3 TBN = mat3(normalize(tangentVector), normalize(biTangentVector), normalVector);
-
-
+    TBN = mat3(normalize(tangentVector), normalize(biTangentVector), normalVector);
 
     // Convert to tangent space
     toLightVector = toLightVector * TBN;
     toViewVector = toViewVector * TBN;
-
-    /*
-    // NOT convert to tangent space
-    toLightVector = toLightVector;
-    toViewVector = toViewVector;
-    */
 
     // Proj and pass
     vec4 postMVP = u_Proj * objectPositionVM;
