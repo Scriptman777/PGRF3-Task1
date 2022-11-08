@@ -9,5 +9,5 @@ uniform sampler2D inTexture;
 out vec4 outColor;
 
 void main() {
-    outColor = texture(inTexture, origPos);
+    outColor = texture(inTexture, origPos).gbra;
 }

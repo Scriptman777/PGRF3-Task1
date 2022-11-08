@@ -110,7 +110,7 @@ public class Renderer {
 
         // Texture init
         try {
-            texture = new OGLTexture2D(TexturePaths.BRICKS);
+            texture = new OGLTexture2D(TexturePaths.BRICKAI);
             textureNormal = new OGLTexture2D(TexturePaths.BRICKS_NORM);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -202,6 +202,8 @@ public class Renderer {
 
         // To texture
         renderTarget.bind();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         glUseProgram(shaderProgram);
         // Render scene
         for (AbstractRenderable renderable: scene.getSolids()) {
@@ -218,6 +220,7 @@ public class Renderer {
         renderTarget.getColorTexture().bind(shaderProgramPost,"inTexture",0);
         glUseProgram(shaderProgramPost);
         fullQuad.draw(shaderProgramPost);
+
 
 
         // Advance time
