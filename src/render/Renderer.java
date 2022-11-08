@@ -16,10 +16,12 @@ import java.nio.DoubleBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL20.glUniform3fv;
+import static org.lwjgl.opengl.GL20.glUseProgram;
 import static org.lwjgl.opengl.GL33.*;
 
 public class Renderer {
     private int shaderProgram;
+    private int shaderProgramPost;
     private Camera camera;
     private Mat4 projectionPersp;
     private AbstractRenderable lightBall = new GridTriangleStrip(50,50);
@@ -46,6 +48,7 @@ public class Renderer {
     private float lightHeight = 0.7f;
 
     private AbstractRenderable mainObj;
+    private AbstractRenderable fullQuad;
 
     //Uniforms
     int loc_uColorMode;
@@ -85,6 +88,7 @@ public class Renderer {
 
         // Shader init
         shaderProgram = ShaderUtils.loadProgram("/shaders/gridBender");
+        shaderProgramPost = ShaderUtils.loadProgram("/shaders/fullQuad");
         // Uniform loc get
         loc_uColorMode = glGetUniformLocation(shaderProgram, "u_ColorMode");
         loc_uView = glGetUniformLocation(shaderProgram, "u_View");
@@ -124,6 +128,8 @@ public class Renderer {
         skybox.setColorMode(3);
         scene.add(skybox);
         */
+
+        fullQuad = new GridTriangleStrip(2,2);
 
 
         AbstractRenderable pinecone = new GridTriangleStrip(50,50);
@@ -194,6 +200,7 @@ public class Renderer {
             glUniformMatrix4fv(loc_uProj, false, projectionOrto.floatArray());
         }
 
+        glUseProgram(shaderProgram);
         // Render scene
         for (AbstractRenderable renderable: scene.getSolids()) {
             glUniform1i(loc_uShape, renderable.getIdentifier());
@@ -202,6 +209,10 @@ public class Renderer {
             renderable.draw(shaderProgram);
 
         }
+
+        glUseProgram(shaderProgramPost);
+        fullQuad.draw(shaderProgramPost);
+
         // Advance time
         time+=0.01;
     }
