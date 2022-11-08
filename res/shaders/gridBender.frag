@@ -56,6 +56,11 @@ void main() {
     // TEXTURED
     if (u_ColorMode == 0) {
         outColor = texture(inTexture, origVertPos);
+        if (origVertPos.x > 0.45 && origVertPos.x < 0.55 ){
+            if (origVertPos.y > 0.45 && origVertPos.y < 0.55 ){
+                outColor = vec4(1,0,0,1);
+            }
+        }
     }
     // VIEW POSITION
     else if (u_ColorMode == 1) {

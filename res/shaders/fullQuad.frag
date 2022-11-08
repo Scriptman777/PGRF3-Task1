@@ -9,5 +9,13 @@ uniform sampler2D inTexture;
 out vec4 outColor;
 
 void main() {
-    outColor = texture(inTexture, origPos).gbra;
+
+    if (origPos.y < 0.1 || origPos.y > 0.9) {
+        outColor = texture(inTexture, origPos).gbra;
+    }
+    else {
+        outColor = texture(inTexture, origPos);
+    }
+
+
 }
