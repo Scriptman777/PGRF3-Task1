@@ -1,6 +1,7 @@
 package render;
 
 import constants.TexturePaths;
+import lwjglutils.OGLRenderTarget;
 import lwjglutils.OGLTexture2D;
 import lwjglutils.ShaderUtils;
 import model.Scene;
@@ -66,6 +67,8 @@ public class Renderer {
     int loc_uUseDiffuse;
     int loc_uUseSpecular;
 
+    private OGLRenderTarget renderTarget;
+
     public Renderer(long window, int width, int height) {
         this.window = window;
         this.width = width;
@@ -114,21 +117,14 @@ public class Renderer {
         }
 
         initControls();
+
+        renderTarget = new OGLRenderTarget(width,height);
     }
 
 
     private void createScene() {
         // Fill scene
         Mat4 tempModel;
-        /*
-        AbstractRenderable skybox = new GridTriangleStrip(50,50);
-        skybox.setIdentifier(ShapeIdents.BALL);
-        Mat4 tempModel = skybox.getModel();
-        skybox.setModel(tempModel.mul(new Mat4Scale(10,10,10)));
-        skybox.setColorMode(3);
-        scene.add(skybox);
-        */
-
         fullQuad = new GridTriangleStrip(2,2);
 
 
@@ -171,6 +167,8 @@ public class Renderer {
         texture.bind(shaderProgram,"inTexture",0);
         textureNormal.bind(shaderProgram,"inTexNormal",1);
 
+
+
         // Shader
         glUseProgram(shaderProgram);
 
@@ -200,6 +198,10 @@ public class Renderer {
             glUniformMatrix4fv(loc_uProj, false, projectionOrto.floatArray());
         }
 
+
+
+        // To texture
+        renderTarget.bind();
         glUseProgram(shaderProgram);
         // Render scene
         for (AbstractRenderable renderable: scene.getSolids()) {
@@ -210,8 +212,13 @@ public class Renderer {
 
         }
 
+
+        // To quad
+        glBindFramebuffer(GL_FRAMEBUFFER,0);
+        renderTarget.getColorTexture().bind(shaderProgramPost,"inTexture",0);
         glUseProgram(shaderProgramPost);
         fullQuad.draw(shaderProgramPost);
+
 
         // Advance time
         time+=0.01;

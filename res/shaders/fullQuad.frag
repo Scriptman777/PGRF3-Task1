@@ -1,11 +1,13 @@
 #version 330
 
-in vec3 vertColor;
+in vec2 origPos;
 
 uniform int time;
+
+uniform sampler2D inTexture;
 
 out vec4 outColor;
 
 void main() {
-    outColor = vec4(vertColor, 1.f);
+    outColor = texture(inTexture, origPos);
 }
