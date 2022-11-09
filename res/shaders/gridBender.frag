@@ -13,6 +13,7 @@ in float lightDistance;
 uniform int u_ColorMode;
 uniform int u_LightMode;
 uniform bool u_useLight;
+uniform bool u_useNormalMap;
 uniform bool u_useSpecular;
 uniform bool u_useDiffuse;
 uniform bool u_useAmbient;
@@ -23,6 +24,7 @@ uniform sampler2D inTexNormal;
 
 out vec4 finalOutColor;
 
+// Combine all parts of Phong lighting with option to toggle
 vec4 combinePhong(vec4 ambientPart, vec4 diffusePart, vec4 specularPart) {
     vec4 finalPhong = vec4(0.f,0.f,0.f,0.f);
     // Allow toggle for parts
@@ -38,6 +40,7 @@ vec4 combinePhong(vec4 ambientPart, vec4 diffusePart, vec4 specularPart) {
     return finalPhong;
 }
 
+// Get normal from normal map
 vec3 loadNormalMap() {
     vec4 norm = texture(inTexNormal, origVertPos);
     vec3 transNorm = 2 * (norm.rgb - 0.5);
@@ -49,10 +52,15 @@ void main() {
 
     vec4 outColor;
 
-    vec3 mapNormal = loadNormalMap();
+    // Toggle normal mapping
+    vec3 normal = normalVector;
 
-    // TODO: Add toggle for normalMap
+    if (u_useNormalMap) {
+        normal = loadNormalMap();
+    }
 
+
+    // Different modes of object coloring
     // TEXTURED
     if (u_ColorMode == 0) {
         outColor = texture(inTexture, origVertPos);
@@ -103,6 +111,7 @@ void main() {
     }
 
     // LIGHT
+    // Different ways to calculate light. ID 100 is lightsource, no calculation needed
     if (u_useLight && u_ColorMode != 100) {
         vec4 diffuseColor, ambientColor, specularColor;
         float shininess, ambientStrength, specularStrength;
@@ -173,7 +182,11 @@ void main() {
             quadraticAttenuation * lightDistance * lightDistance);
             isSpot = true;
             spotCutOff = 0.97;
-            spotDirection = vec3(0.05*sin(u_Time/2),0.05*cos(u_Time),-1) * TBN;
+            spotDirection = vec3(0.05*sin(u_Time/2),0.05*cos(u_Time),-1);
+            if (u_useNormalMap){
+                // Adjust for normal mapped objects
+                spotDirection = spotDirection * TBN;
+            }
         }
         // GREEN
         else if (u_LightMode == 5) {
@@ -199,22 +212,26 @@ void main() {
 
         // DIFFUSE
         vec3 nd;
+        // Polar objects are bent "backwards", need to adjust
         if (isPolar == 1){
-            nd = -normalize(mapNormal);
+            nd = -normalize(normal);
         }
         else {
-            nd = normalize(mapNormal);
+            nd = normalize(normal);
         }
 
+        // Normalize vectors
         vec3 ld = normalize(toLightVector);
 
         vec3 vd = normalize(toViewVector);
 
         float NDotL = max(dot(nd,ld),0.f);
 
+        // Hlaf vector for specular
         vec3 halfVector = normalize(ld + vd);
         float NDotH = max(0.0,dot(nd, halfVector));
 
+        // Calculate parts
         vec4 specularPart = specularColor * specularStrength  * (pow(NDotH,shininess));
 
         vec4 diffusePart = NDotL * diffuseColor;
@@ -223,6 +240,7 @@ void main() {
 
         float spotEffect = dot(normalize(spotDirection),-ld);
 
+        // If spot mode is on, limit the angle
         if (isSpot){
             float blend = clamp((spotEffect-spotCutOff)/(1-spotCutOff),0.0,1.0);
             vec4 phongColor = combinePhong(ambientPart, diffusePart, specularPart) * outColor * att;
@@ -235,7 +253,7 @@ void main() {
 
     }
     else {
-        // Do nothing with the color
+        // Do nothing with the color - no light calculation
         finalOutColor = outColor;
     }
 

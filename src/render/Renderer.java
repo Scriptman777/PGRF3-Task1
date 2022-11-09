@@ -1,5 +1,6 @@
 package render;
 
+import constants.ColorModeIdents;
 import constants.TexturePaths;
 import lwjglutils.OGLTexture2D;
 import lwjglutils.ShaderUtils;
@@ -19,16 +20,18 @@ import static org.lwjgl.opengl.GL20.glUniform3fv;
 import static org.lwjgl.opengl.GL33.*;
 
 public class Renderer {
-    private int shaderProgram;
+    private final int shaderProgram;
     private Camera camera;
-    private Mat4 projectionPersp;
-    private AbstractRenderable lightBall = new GridTriangleStrip(50,50);
+    private final AbstractRenderable lightBall = new GridTriangleStrip(50,50);
 
-    private Mat4 projectionOrto;
-    private OGLTexture2D texture;
-    private OGLTexture2D textureNormal;
-    private Scene scene = new Scene();
-    private long window;
+    private final Mat4 projectionPersp;
+    private final Mat4 projectionOrto;
+
+    private final OGLTexture2D texture;
+    private final OGLTexture2D textureNormal;
+
+    private final Scene scene = new Scene();
+    private final long window;
 
     private int width, height;
     private int lightMode = 0;
@@ -43,7 +46,7 @@ public class Renderer {
     private float camSpeed = 0.05f;
     private float ratio = 7;
     private float time = 0;
-    private float lightHeight = 0.7f;
+    private float lightHeight = 0.9f;
 
     private AbstractRenderable mainObj;
 
@@ -62,6 +65,7 @@ public class Renderer {
     int loc_uUseAmbient;
     int loc_uUseDiffuse;
     int loc_uUseSpecular;
+    int loc_uUseNormalMap;
 
     public Renderer(long window, int width, int height) {
         this.window = window;
@@ -100,6 +104,7 @@ public class Renderer {
         loc_uUseAmbient = glGetUniformLocation(shaderProgram,"u_useAmbient");
         loc_uUseDiffuse = glGetUniformLocation(shaderProgram,"u_useDiffuse");
         loc_uUseSpecular = glGetUniformLocation(shaderProgram,"u_useSpecular");
+        loc_uUseNormalMap = glGetUniformLocation(shaderProgram,"u_useNormalMap");
 
         // Texture init
         try {
@@ -115,34 +120,43 @@ public class Renderer {
 
     private void createScene() {
         // Fill scene
+
+        // Temporary helper for model changes
         Mat4 tempModel;
-        /*
-        AbstractRenderable skybox = new GridTriangleStrip(50,50);
-        skybox.setIdentifier(ShapeIdents.BALL);
-        Mat4 tempModel = skybox.getModel();
-        skybox.setModel(tempModel.mul(new Mat4Scale(10,10,10)));
-        skybox.setColorMode(3);
-        scene.add(skybox);
-        */
 
 
-        AbstractRenderable pinecone = new GridTriangleStrip(50,50);
-        pinecone.setIdentifier(ShapeIdents.PINECONE);
-        tempModel = pinecone.getModel();
-        pinecone.setModel(tempModel.mul(new Mat4Transl(4,4,2.5)));
-        pinecone.setColorMode(0);
-        scene.add(pinecone);
+        AbstractRenderable donut = new GridTriangleStrip(50,50);
+        donut.setIdentifier(ShapeIdents.DONUT);
+        tempModel = donut.getModel();
+        donut.setModel(tempModel.mul(new Mat4Transl(4,4,2.5)));
+        donut.setColorMode(ColorModeIdents.NORMAL);
+        donut.setNormalMapUse(false);
+        scene.add(donut);
 
+        AbstractRenderable ball = new GridTriangleStrip(50,50);
+        ball.setIdentifier(ShapeIdents.BALL);
+        tempModel = ball.getModel();
+        ball.setModel(tempModel.mul(new Mat4Transl(-4,4,1.5)));
+        ball.setColorMode(ColorModeIdents.TEXCOORD_PLASMA);
+        ball.setNormalMapUse(true);
+        scene.add(ball);
 
+        AbstractRenderable pine = new GridTriangleStrip(50,50);
+        pine.setIdentifier(ShapeIdents.PINECONE);
+        tempModel = pine.getModel();
+        pine.setModel(tempModel.mul(new Mat4Transl(4,-4,2)));
+        pine.setColorMode(ColorModeIdents.ITALIAN);
+        pine.setNormalMapUse(false);
+        scene.add(pine);
 
-
-        lightBall.setColorMode(100);
+        lightBall.setColorMode(ColorModeIdents.LIGHT_BALL);
         lightBall.setIdentifier(ShapeIdents.LIGHT);
         scene.add(lightBall);
 
         mainObj = new GridTriangleStrip(300,300);
-        mainObj.setIdentifier(ShapeIdents.DONUT);
-        mainObj.setColorMode(0);
+        mainObj.setIdentifier(ShapeIdents.COS_WAVE_ANIM);
+        mainObj.setColorMode(ColorModeIdents.TEXTURED);
+        mainObj.setNormalMapUse(true);
         scene.add(mainObj);
     }
 
@@ -181,6 +195,7 @@ public class Renderer {
         glUniform1i(loc_uUseDiffuse,useDiffuse ? 1 : 0);
         glUniform1i(loc_uUseSpecular,useSpecular ? 1 : 0);
 
+
         // Move light
         glUniform3fv(loc_uLightPos, new float[] {0, (float) (3.5*Math.sin(time/2)), lightHeight});
         lightBall.setModel(new Mat4Transl(0,3.5*Math.sin(time/2),lightHeight));
@@ -199,8 +214,8 @@ public class Renderer {
             glUniform1i(loc_uShape, renderable.getIdentifier());
             glUniform1i(loc_uColorMode, renderable.getColorMode());
             glUniformMatrix4fv(loc_uModel, false, renderable.getModel().floatArray());
+            glUniform1i(loc_uUseNormalMap,renderable.usesNormalMap() ? 1 : 0);
             renderable.draw(shaderProgram);
-
         }
         // Advance time
         time+=0.01;
@@ -336,6 +351,9 @@ public class Renderer {
                         break;
                     case GLFW_KEY_L:
                         useLight = !useLight;
+                        break;
+                    case GLFW_KEY_N:
+                        mainObj.setNormalMapUse(!mainObj.usesNormalMap());
                         break;
                     case GLFW_KEY_KP_MULTIPLY:
                         lightHeight += 0.1;

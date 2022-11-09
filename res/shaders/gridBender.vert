@@ -13,6 +13,7 @@ uniform int u_LightMode;
 uniform int u_shapeID;
 uniform float u_Ratio;
 uniform float u_Time;
+uniform bool u_useNormalMap;
 
 out vec2 origVertPos;
 out vec3 computedVertPos;
@@ -23,11 +24,8 @@ out vec3 toViewVector;
 out float lightDistance;
 out mat3 TBN;
 
-
 // Bool varying not allowed, has to be int...
 flat out int isPolar;
-
-uniform sampler2D inTexNormal;
 
 float diff = 0.001;
 vec3 tangentVector, biTangentVector;
@@ -85,6 +83,7 @@ vec3 cylindricalConvert(vec3 calcPos) {
     return vec3(x,y,z);
 }
 
+// Adjust grid according to a function
 vec3 getPosition(vec2 pos){
 
     float x,y,z;
@@ -116,7 +115,7 @@ vec3 getPosition(vec2 pos){
         calcPos = initCartesian(pos);
         calcPos.z = cos(u_Time) * cos(sqrt(20.f * pow(calcPos.x, 2.f) + 20 * pow(calcPos.y, 2.f)));
     }
-    // CANDY
+    // FLAP
     else if (u_shapeID == 4) {
         calcPos = initCartesian(pos);
         calcPos.z = cos(calcPos.y*abs(sin(u_Time)));
@@ -191,12 +190,6 @@ vec3 getPosition(vec2 pos){
         calcPos.z = log(calcPos.y)+sin(calcPos.x*6)*0.3;
         calcPos = cylindricalConvert(calcPos);
     }
-    // AAAAAAA
-    else if (u_shapeID == 13) {
-        calcPos = initCylindrical(pos);
-        calcPos.z = pow(calcPos.y,3.f)-1;
-        calcPos = cylindricalConvert(calcPos);
-    }
     // DEFAULT
     else {
         calcPos = initCartesian(pos);
@@ -207,12 +200,14 @@ vec3 getPosition(vec2 pos){
     return calcPos;
 }
 
+// Calculate normal on the surface
 vec3 getNormal(float x, float y) {
     vec3 dx = vec3(getPosition(vec2(x + diff, y)) - getPosition(vec2(x, y)));
     vec3 dy = vec3(getPosition(vec2(x, y + diff)) - getPosition(vec2(x, y)));
     return cross(dx, dy);
 }
 
+// Calculate tangent on the surface
 vec3 getTangent(float x, float y) {
     return vec3(getPosition(vec2(x + diff, y)) - getPosition(vec2(x, y)));
 }
@@ -223,13 +218,13 @@ void main() {
 
     // LIGHT
 
-    // Position in view coords
     mat4 VM = u_View * u_Model;
 
+    // Position in view coords
     vec4 objectPositionVM = VM * vec4(transformedPos, 1.f);
     vec4 lightSourcePos;
     if (u_LightMode == 3 || u_LightMode == 4) {
-        // Light on viewer
+        // Light positioned on viewer
         lightSourcePos = vec4(0,0,0,1.f);
     }
     else {
@@ -237,13 +232,10 @@ void main() {
     }
 
 
+    // Vectors needed for light calculation
     toLightVector = lightSourcePos.xyz - objectPositionVM.xyz;
     toViewVector = - objectPositionVM.xyz;
-
     lightDistance = length(toLightVector);
-
-
-
 
     mat3 normalMatrix = transpose(inverse(mat3(VM)));
 
@@ -254,9 +246,17 @@ void main() {
 
     TBN = mat3(normalize(tangentVector), normalize(biTangentVector), normalVector);
 
-    // Convert to tangent space
-    toLightVector = toLightVector * TBN;
-    toViewVector = toViewVector * TBN;
+    if (u_useNormalMap) {
+        // Convert to tangent space for normal mapping
+        toLightVector = toLightVector * TBN;
+        toViewVector = toViewVector * TBN;
+    }
+    else {
+        toLightVector = toLightVector;
+        toViewVector = toViewVector;
+    }
+
+
 
     // Proj and pass
     vec4 postMVP = u_Proj * objectPositionVM;

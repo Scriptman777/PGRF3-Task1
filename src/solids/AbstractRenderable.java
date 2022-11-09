@@ -20,6 +20,7 @@ public abstract class AbstractRenderable{
 
     protected int identifier;
 
+    protected boolean usesNormalMap;
 
 
     protected Mat4 model = new Mat4Identity();
@@ -104,6 +105,14 @@ public abstract class AbstractRenderable{
 
     public void setColorMode(int colorMode) {
         this.colorMode = colorMode;
+    }
+
+    public boolean usesNormalMap() {
+        return usesNormalMap;
+    }
+
+    public void setNormalMapUse(boolean usesNormalMap) {
+        this.usesNormalMap = usesNormalMap;
     }
 
 }
